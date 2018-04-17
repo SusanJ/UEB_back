@@ -20,6 +20,16 @@ public class SubSupIndicator extends Indicator {
      that the symbol indicator is not needed in uncontracted
      braille.  This class assumes that it is legal 
      though not required.
+
+Rulebook 11.4.1 The scope of a level change indicator, that is, 
+  the symbol(s) affected by it, is the next "item".
+  An item is defined as any of the following groupings:
+  (1) An entire number, i.e. the initiating numeric symbol 
+  and all succeeding symbols within the numeric mode thus 
+  established (which would include decimal points,
+  commas and simple numeric fraction lines).
+
+  Etc.!!!
 */
  static HashMap <String,SubSupIndicator> ssInds =
     new HashMap <String,SubSupIndicator> ();
@@ -48,6 +58,7 @@ public class SubSupIndicator extends Indicator {
   this.notCon = notCon;
   this.startTag = startTag;
   this.endTag = endTag;
+  ssInds.put( brl, this );
  }
 String getStartTag(){
  return startTag;
@@ -87,7 +98,8 @@ public static void makeSubSupInds( boolean report,
         false, true, "<sub>", "</sub>" );
 
    if (report)
-    System.out.println( "   Super- and sub-script indicators made." ); 
+    System.out.println( "   Super- and sub-script indicators made. ("+
+       ssInds.size()+")" ); 
 }
   
 

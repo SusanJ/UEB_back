@@ -2,9 +2,10 @@ package org.dotlessbraille.indicators;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-//Manages braille symbols that do terminate the scope
+// Manages braille symbols that *do* terminate the scope
 //of an active indicator
-class EndScope{
+
+public class EndScope{
 
 public static HashMap<String,ArrayList<String>> endSymData =
           new HashMap<String,ArrayList<String>> ();
@@ -21,6 +22,10 @@ EndScope( String name, boolean spaceEnds ){
  this.name = name;
  this.spaceEnds = spaceEnds;
  endSymData.put( name, endSym );
+}
+public boolean allowed( String brl ){
+ if (endSym.contains( brl )) return false;
+ return true;
 }
 void addSym( String toAdd ){
  endSym.add( toAdd );

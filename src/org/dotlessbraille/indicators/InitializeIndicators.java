@@ -19,7 +19,7 @@ public static void makeIndicators( boolean report,
   if (report) Indicator.indicatorReport();
 }
 public static void main( String [] args ){
-  String g1SymInd = ";;;;";
+  String g1SymInd = ";";
   makeIndicators( true, false, g1SymInd );
 }
 }//End Class.

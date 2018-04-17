@@ -26,8 +26,8 @@ public class BackInd{
  boolean trace = true;
  boolean traceG1 = true;
 
- boolean dlMention = false;
- boolean lastWasSubSup = false;
+ //boolean dlMention = false;
+// boolean lastWasSubSup = false;
  public static boolean uncontracted = true;
 
 public BackInd ( PendingCapInds capInfo,
@@ -39,6 +39,9 @@ public BackInd ( PendingCapInds capInfo,
   setUncon( isUncontracted );
  }
 
+static boolean getDlMention(){
+ return KeepTrack2.getDlMention();
+}
 
     //IMPROVE THIS (SimBraille?)
 String brlDots( String brl ){
@@ -73,15 +76,19 @@ public Indicator check4Ind( String brl ){
  Indicator indy = Indicator.getInd( brl );
  return indy;
 }
+
+    //NUMERIC INDICATORS
  //The basic 12 Numeric Start Indicators are both
  //indicators and numeric symbols so need special
  //treatment.  The backtrans logic in KeepTrack
  //hands over the information needed to handle the
  //the indicator portion. 
 public boolean handleNumericIndicator( String brl, Indicator ind ){
+ System.out.println( "In BackInd.handleNumInd ind: " +ind );
  IndicatorClass ic = ind.myIndData.getMyClassEnum();
  if (ic != IndicatorClass.NUMERIC_INDICATOR) {
-   System.out.println( "Error in numeric mode for braille: "+brl);
+   System.out.println( " Error in numeric mode for braille: "+brl);
+   System.out.println( "ic: "+ic );
    System.exit( 2 );
  }
  System.out.println( "In BackInd.handleNumInd" );
@@ -112,9 +119,9 @@ public String handleIndicator( Indicator indy ){
    IndicatorClass ic = indy.myIndData.getMyClassEnum();
    System.out.println( "KT.handleInd.--IC: "+ic );
      //Symbol mentioned as example, not actually used
-   if (dlMention){
+   if (KeepTrack2.getDlMention()){
     System.out.println( "Indicator was mentioned; not active." );
-    dlMention = false;  //ASSUMED SCOPE
+    KeepTrack2.setDlMention( false ); //ASSUMED SCOPE
     return brlDots( indy.getBrl() );
    }
    switch( ic ){
@@ -129,7 +136,7 @@ public String handleIndicator( Indicator indy ){
     case DOT_LOCATOR:
       DotLocatorIndicator dl = (DotLocatorIndicator)indy;
       if (DotLocatorIndicator.isMention( dl )){
-        dlMention = true;
+        KeepTrack2.setDlMention( true );
       }
       if (showDL) return brlDots( indy.getBrl() );
       return "";
@@ -174,7 +181,7 @@ public String handleIndicator( Indicator indy ){
     SubSupIndicator ssIndy = (SubSupIndicator) indy;
      //Set as pending when identified as an indicator ???
     SubSupIndicator.setPending( ssIndy );
-    lastWasSubSup = true;
+    KeepTrack2.setLastWasSubSup( true );
     return SubSupIndicator.getPendingStartTag();
    }
    System.out.println( "Warning -- logic error in indicator process." );

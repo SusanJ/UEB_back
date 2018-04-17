@@ -9,17 +9,12 @@ import java.io.Reader;
 import java.util.List;
 import org.dotlessbraille.transtables.KeepTrack;
 import org.dotlessbraille.indicatoruse.PendingCapInds;
-//import java.util.HashMap;
-//import java.util.Stack;
-//import java.util.Set;
-//import java.lang.Character;
-//import java.lang.Class;
 
 class BackPR{
 
  static String[] ruleNames;
  static boolean printTree = true;
-
+ static boolean showRuleNames;
  static boolean debugComments = false;
  static boolean trace = true;
  static boolean numDebug = false;
@@ -30,17 +25,22 @@ class BackPR{
  
  static boolean numLineCont = false;  //FIX THIS!!!
  static boolean hideSep = false;
-  static void setRuleNames( ){
+
+ static void setRuleNames( ){
     ruleNames = simpleParser.ruleNames;
+    if (!showRuleNames) return;
+    for (int rn=0; rn<ruleNames.length; rn++){
+      System.out.println( "Rule: "+rn+" "+ruleNames[rn] );
+    }
   }
      
  static class Translator extends simpleParserBaseListener{
 
    KeepTrack statusManager;
-
    BufferedTokenStream allTokens; //Support comment channel
    TokenStreamRewriter rewriter;
    int lineNumber = 0;
+
    Translator( KeepTrack statusManager, 
                BufferedTokenStream allTokens) {
     this.statusManager = statusManager;
@@ -48,8 +48,6 @@ class BackPR{
     rewriter = new TokenStreamRewriter( allTokens );
     lineNumber = 0;
    }
-
-
 
 //  ===========BACKTRANSLATION ANNOTATIONS SAVED HERE============
 /**   See v4 Ref. p. 123   ParserTreeProperty is an 
@@ -67,9 +65,7 @@ class BackPR{
     ParseTreeProperty<String> info = new ParseTreeProperty<String>();
     void setInfo(ParseTree ctx, String s) {info.put(ctx, s);}
     String getInfo(ParseTree ctx) {return ink.get(ctx);}
-
-
-
+      
 //  ========PARSE TREE NODES BACKTRANSLATION STARTS HERE=========
      //  -->0. 'text' is name of grammar's root node<--
 @Override 
@@ -366,14 +362,15 @@ class BackPR{
  System.out.println( "\n   ***TrailingSep***" );
   int cnt = ctx.getChildCount();
   //if (!hideSep)
-   //System.out.println( "Separator count: "+cnt+
-                       //" text: "+ctx.getText() );
+   System.out.println( "Trailng separator count: "+cnt+
+                       " text: |"+ctx.getText()+"|" );
   String ink;
   StringBuilder buf = new StringBuilder();
   
   for (int i=0; i<cnt; i++){
-   buf.append( getInk( ctx ) );
-  }
+   ink = getInk( ctx.getChild(i) );
+   buf.append( ink );
+  } 
   setInk( ctx, buf.toString() );
 }
 @Override
@@ -391,8 +388,9 @@ class BackPR{
    if (!hideSep)
     System.out.println( "\n  Item no. "+i+" brl: |"+brl+"|" );
    ink = statusManager.backTrans( brl, KeepTrack.Trans.SEPARATOR );
+   System.out.println( "\n  Item no. "+i+" ink: |"+ink+"|" );
   //backTransSeparator( brl );
-   setInk( ctx.getChild(i), ink );
+   //setInk( ctx.getChild(i), ink );
    buf.append( ink );
   }
   setInk( ctx, buf.toString() );
@@ -459,62 +457,54 @@ public void concat( ParserRuleContext ctx ){
 
 }//End Inner Class Translator.
 
-//=========================================================
-public static void main( String[] args ) throws Exception {
-//=========================================================
+//===========================================================
+  public static void main( String[] args ) throws Exception {
+//===========================================================
 
  System.out.println( "\n    Welcome to Basic UEB backtranslator!" );
  System.out.println( "      Uncontracted braille w/o code switching options." );
  System.out.println( "      Uses ANTLR 4.7.1 for parsing." );
 
-        String inputFile = null;
-        CharStream input = null;
-        if ( args.length > 0 ) inputFile = args[0];
-        if (inputFile == null){
-System.out.println( "\n    -->Enter North Am. ASCII Braille." );
-System.out.println( "    -->End input with CTRL-z "+
-                 "as only symbol on last line." );
-          //input = CharStreams.fromStream( System.in );
-
+ String inputFile = null;
+ CharStream input = null;
+ if ( args.length > 0 ) inputFile = args[0];
+ if (inputFile == null){
+    System.out.println( "\n    -->Enter North Am. ASCII Braille." );
+    System.out.println( "    -->End input with CTRL-z "+
+                      "as only symbol on last line." );
     Reader myReader = new InputStreamReader( System.in, "UTF-8");
     CodePointCharStream cpcs = CharStreams.fromReader( myReader );
-        input = cpcs;
-        
-           //System.out.println ( "Please specify an input file!" );
-           //System.exit( 0 );
-        } else {
-         File f = new File( inputFile );
-         if(f.exists() && !f.isDirectory())  {
-          input = CharStreams.fromFileName( inputFile );
-         } else {
-          System.out.println( "\n OOPS! Cannot find input file: "
-          +inputFile );
-          System.exit( 0 );
-         }
-        }
+    input = cpcs;
+ } else {
+    File f = new File( inputFile );
+    if (f.exists() && !f.isDirectory() )  {
+       input = CharStreams.fromFileName( inputFile );
+    } else {
+       System.out.println( "\n OOPS! Cannot find input file: "
+                           +inputFile );
+       System.exit( 0 );
+    }
+  }
 
 /**  I. Connect lexer and parser and instruct parser to
         build a parse tree.  
 */
         simpleLexer lexer = new simpleLexer( input );
+        //  Supposedly allows parser to re-write its output
+        //CommonTokenStream tokens = new TokenRewriteStream(lexer);
         CommonTokenStream tokens = new CommonTokenStream( lexer );
-        simpleParser parser = new simpleParser( tokens );
-        String[] ruleNames = parser.getRuleNames();
-        //System.out.println("No. of ruleNames from parser: "+ruleNames.length );
-        //for (int r = 0; r< ruleNames.length; r++){
-         //System.out.println( "Rule index: "+r+" name: "+ruleNames[r] );
-        //}
+        simpleParser parser = new simpleParser( tokens ); 
         parser.setBuildParseTree( true );
 		
 /**  II. Start tree with the topmost rule in the Parser 
          grammar.  (Rule #0 if grammar starts with that one.)
 */
-     ParseTree tree = parser.text();
-     if (printTree){
-      System.out.println( "     PARSE TREE: ");
-      System.out.println( "      "+
+         ParseTree tree = parser.text();
+         if (printTree){
+           System.out.println( "     PARSE TREE: ");
+           System.out.println( "      "+
 	                 tree.toStringTree( parser ));
-     }
+         }
 
     //System.out.println( "(text\n "+" (line\n "+"  (item\n " );
     // Optionally print tree in text form
@@ -523,22 +513,20 @@ System.out.println( "    -->End input with CTRL-z "+
     //prettyPrint( tree.toStringTree( parser ));
 
 /**  III. Insert logic to walk and annotate tree here....*/
+
+          PendingCapInds capInfo = new PendingCapInds();
+          boolean uncontracted = true;   //SHOULD BE AN OPTION SOON
+          KeepTrack kt = new KeepTrack( capInfo, uncontracted );
+          kt.makeTables( true, false );
+           //Translator, i.e. annotator, must extend baseListener 
+          Translator bt = new Translator( kt, tokens );
+          BackPR.setRuleNames();
+     
      ParseTreeWalker walker = new ParseTreeWalker();
-     PendingCapInds capInfo = new PendingCapInds();
-    boolean uncontracted = true;
-   KeepTrack kt = new KeepTrack( capInfo, uncontracted );
-     //KeepTrack kt = new KeepTrack( capInfo );
-     kt.makeTables( false, false );
-       //Translator, i.e. annotator, must extend baseListener 
-     Translator bt = new Translator( kt, tokens );
-     BackPR.setRuleNames();
-     for (int rn=0; rn<ruleNames.length; rn++){
-      System.out.println( "Rule: "+rn+" "+ruleNames[rn] );
-     }
-     //System.out.println( );
      walker.walk(bt, tree);
 
 /**  IV. Display backtranslation  */
+
      System.out.println();
      System.out.println( "      ***Backtranslation***" );
      System.out.println(" Back-translated print from tree: ");

@@ -1,31 +1,42 @@
 package org.dotlessbraille.indicators;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.dotlessbraille.manifold.KeepTrack2;
 
-//Manages braille symbols that do not change the scope of an active indicator
-class Persist{
+ //Maintains knowledge of thebraille symbols that do NOT change the 
+ //scope of an active indicator
+
+public class Persist{
 
 public static HashMap<String,ArrayList<String>> persistData =
-       new HashMap<String,ArrayList<String>> ();
+           new HashMap<String,ArrayList<String>> ();
 
-String name;
-ArrayList<String> perSym = new ArrayList<String>() ;
+ String name;
+ ArrayList<String> perSym = new ArrayList<String>() ;
 
 Persist( String name ){
  this.name = name;
  persistData.put( name, perSym );
 }
+
+public boolean allowed( String brl ){
+ return perSym.contains( brl );
+}
+
 void addSym( String toAdd ){
  perSym.add( toAdd );
 }
+
 void addSym( ArrayList<String> toAdd ){
  for (String s : toAdd){
   addSym( s );
  }
 }
+
 void display(){
+ System.out.println( "Allowed braille symbols for: "+name );
  for (String s : perSym){
-  System.out.println( "Persistent sign: "+s);
+  System.out.println( "Persistent symbol: "+s);
  }
 
 }

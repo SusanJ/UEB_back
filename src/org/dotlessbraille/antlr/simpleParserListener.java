@@ -48,6 +48,16 @@ public interface simpleParserListener extends ParseTreeListener {
 	 */
 	void exitCapsPassageInd(simpleParser.CapsPassageIndContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link simpleParser#rootlessToken}.
+	 * @param ctx the parse tree
+	 */
+	void enterRootlessToken(simpleParser.RootlessTokenContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#rootlessToken}.
+	 * @param ctx the parse tree
+	 */
+	void exitRootlessToken(simpleParser.RootlessTokenContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link simpleParser#item}.
 	 * @param ctx the parse tree
 	 */
@@ -157,16 +167,6 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitUcLetters(simpleParser.UcLettersContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link simpleParser#rootlessToken}.
-	 * @param ctx the parse tree
-	 */
-	void enterRootlessToken(simpleParser.RootlessTokenContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link simpleParser#rootlessToken}.
-	 * @param ctx the parse tree
-	 */
-	void exitRootlessToken(simpleParser.RootlessTokenContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#prefix}.
 	 * @param ctx the parse tree
@@ -337,6 +337,76 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTfTermIndicator(simpleParser.TfTermIndicatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#tfSymbolInd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTfSymbolInd(simpleParser.TfSymbolIndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#tfSymbolInd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTfSymbolInd(simpleParser.TfSymbolIndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#tfWordInd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTfWordInd(simpleParser.TfWordIndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#tfWordInd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTfWordInd(simpleParser.TfWordIndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#subsup}.
+	 * @param ctx the parse tree
+	 */
+	void enterSubsup(simpleParser.SubsupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#subsup}.
+	 * @param ctx the parse tree
+	 */
+	void exitSubsup(simpleParser.SubsupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl1}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl1(simpleParser.Encl1Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl1}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl1(simpleParser.Encl1Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl2}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl2(simpleParser.Encl2Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl2}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl2(simpleParser.Encl2Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl3}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl3(simpleParser.Encl3Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl3}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl3(simpleParser.Encl3Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#scrip}.
+	 * @param ctx the parse tree
+	 */
+	void enterScrip(simpleParser.ScripContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#scrip}.
+	 * @param ctx the parse tree
+	 */
+	void exitScrip(simpleParser.ScripContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#preAlone}.
 	 * @param ctx the parse tree

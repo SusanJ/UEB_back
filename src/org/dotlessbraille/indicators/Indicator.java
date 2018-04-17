@@ -36,7 +36,8 @@ public class Indicator{
  int minItemsInPassage = 0;
  Indicator expTerm;
  ArrayList <Indicator> bunch = new ArrayList<Indicator>();
- 
+
+       //====Constructors==== 
 Indicator( String brl, String name, Scope scope ){
  this.brl = brl;
  this.name = name;
@@ -63,10 +64,10 @@ Indicator( boolean mode, String key,
  this.brl = key;
  add( this );
 }
-         //METHODS
+         //====METHODS====
 
 //This method is subclassed for indicators 
-//with tags
+//which provide tags
 public String getEndTag(){
  return "";
 }
@@ -77,9 +78,8 @@ public void setExpTerm( Indicator term){
 void setIndicatorType( IndicatorType my ){
  this.myType = my;
  if (trace) System.out.println( "setting type for: "+
-  brl+" type: "+myType );
+            brl+" type: "+myType );
 }
- 
 String getStartTag(){
  return "";
 }

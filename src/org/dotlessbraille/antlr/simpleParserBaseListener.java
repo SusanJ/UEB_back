@@ -64,6 +64,18 @@ public class simpleParserBaseListener implements simpleParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterRootlessToken(simpleParser.RootlessTokenContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRootlessToken(simpleParser.RootlessTokenContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterItem(simpleParser.ItemContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -191,18 +203,6 @@ public class simpleParserBaseListener implements simpleParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitUcLetters(simpleParser.UcLettersContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterRootlessToken(simpleParser.RootlessTokenContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitRootlessToken(simpleParser.RootlessTokenContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -407,6 +407,90 @@ public class simpleParserBaseListener implements simpleParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTfTermIndicator(simpleParser.TfTermIndicatorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTfSymbolInd(simpleParser.TfSymbolIndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTfSymbolInd(simpleParser.TfSymbolIndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTfWordInd(simpleParser.TfWordIndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTfWordInd(simpleParser.TfWordIndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSubsup(simpleParser.SubsupContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSubsup(simpleParser.SubsupContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEncl1(simpleParser.Encl1Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEncl1(simpleParser.Encl1Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEncl2(simpleParser.Encl2Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEncl2(simpleParser.Encl2Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEncl3(simpleParser.Encl3Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEncl3(simpleParser.Encl3Context ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterScrip(simpleParser.ScripContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitScrip(simpleParser.ScripContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

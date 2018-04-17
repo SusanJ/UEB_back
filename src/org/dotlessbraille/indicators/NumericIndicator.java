@@ -28,7 +28,7 @@ static boolean trace = false;
 //Convenience constructor for related set of NI's
 /**
 NumericIndicatorx( String lead, String trailers,
-                  String name, Scope scope, String groupName ){
+                   String name, Scope scope, String groupName ){
                   
  super( lead, groupName, scope );
  numInds = new ArrayList<NumericIndicator>();
@@ -125,6 +125,7 @@ static private void makeNumInds( String lead, String trailers,
  }//End for loop.
 
  Grade1Indicator.makeSpecialG1Ind( IndicatorClass.NUMERIC_INDICATOR );
+ System.out.println( "   Made phantom indicator for G1 set by numeric mode. (1)" );
 
  if (trace) System.out.println( "Made a set of "+trailers.length()+
                      " Numerical Indicators." );
@@ -286,6 +287,7 @@ static void mayne( boolean report, boolean details ){
   }
   numericModeSymbols.addSym( period );
   numericModeSymbols.addSym( comma );
+
     //10 numeric space-digit symbols
   StringBuilder buf = new StringBuilder();
   for (int i=0; i<digits.length(); i++){
@@ -296,13 +298,11 @@ static void mayne( boolean report, boolean details ){
   numericModeSymbols.addSym( simpleFractionLine );
   numericModeSymbols.addSym( lineContinuation  );
   numericModeSymbols.addSym( lineContPlusSpace );  
-  //numericModeSymbols.display();
-  //String xyz="xyz";
- // boolean b = NumericIndicator.isNUMindi (xyz);
-  //if (debug) System.out.println( "Test for: "+xyz+" "+b);
+ 
 
  if (trace || report )
-  System.out.println( "   Numeric mode indicators table complete." );
+  System.out.println( "   Numeric mode indicators table complete. ("+
+   NumericIndicator.allNumInds.size()+")" );
 if (trace) System.out.println(
   "Size of allNumInds: "+NumericIndicator.allNumInds.size() );
   //return numInd;

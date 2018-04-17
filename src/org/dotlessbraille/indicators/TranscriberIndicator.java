@@ -42,6 +42,7 @@ public static void makeTI_Table( boolean report, boolean display ){
         Scope.TERMINATOR, tInk  );
   tiTable.put( tbrl, tInk);
   if (report)
-   System.out.println( "   Transcriber indicator table made." );
+   System.out.println( "   Transcriber indicator table made. ("+
+     tiTable.size() +")" );
 }
 }//Emd Class.
