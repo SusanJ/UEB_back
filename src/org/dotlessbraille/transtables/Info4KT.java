@@ -10,6 +10,25 @@ public class Info4KT{
  public Info4KT(){}
 
  //Pass info
+
+ static boolean lastWasVulgarFraction = false;
+ static int conseqNumindCount = 0;
+ //static boolean inNumericMode = false;
+  
+ public void setLastWasVulgarFraction(){
+  lastWasVulgarFraction = true;
+ }
+
+
+
+  //  There are can be more than one numeric indicator
+  // in a numeric sequence
+ public static void incrementNumindCount(){
+  conseqNumindCount = conseqNumindCount+1;
+ }
+ public static void clearNumindCount(){
+  conseqNumindCount =0;
+ }
  public void spaceEncountered4G1(){
   Grade1Indicator.spaceEncountered();
  }
@@ -34,6 +53,15 @@ public class Info4KT{
  }
  public String afterAtEOL(){
   return SubSupIndicator.afterAtEOL();
+ }
+ public String tfEndTagsAfterWord(){
+  return TypeformsHandler.tfEndTagsAfterWord();
+ }
+ public String tfAfterSymbol(){
+  return TypeformsHandler.afterSymbol();
+ }
+ public String tfAfterAtEOL( String ssEnd ){
+  return TypeformsHandler.afterAtEOL( ssEnd );
  }
 }//End Class.
 
