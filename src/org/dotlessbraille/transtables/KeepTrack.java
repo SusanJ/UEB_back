@@ -34,6 +34,8 @@ public class KeepTrack{
  boolean trace = true;
  boolean traceG1 = true;
  boolean traceNum = true;
+ boolean traceSA = false;
+ boolean traceAfter = false;
 
  //boolean nummode = false;
  //boolean defaultUEB = true;
@@ -54,17 +56,29 @@ public class KeepTrack{
      //====Constructor====//
  
  public KeepTrack( PendingCapInds capInfo,
-                   boolean isUncontracted ){
+                   boolean isUncontracted,
+                   int linesDone ){
   this.capInfo = capInfo;
   this.letterBT = new LetterBT( capInfo );
-  this.saLetterBT = new SALetterBT( capInfo );
+  this.saLetterBT = new SALetterBT( capInfo, traceSA );
   //capsHandler = new CapsHandler( capInfo );
   setUncon( isUncontracted );
+  Info4KT.setLinesDone( linesDone );
   backInd = new BackInd ( capInfo,
                           isUncontracted );
  }
 
            //**Communication**//
+
+public void incrementLinesDone(){
+ Info4KT.incLinesDone();
+}
+public int getLinesDone(){
+ return Info4KT.getLinesDone();
+}
+public int getCurrentLineNumber(){
+ return getLinesDone()+1;
+}
 
 void setLastWasSubSup( boolean toSet ){
  System.out.println( "KT--Set lastWasSubSup: "+toSet );
@@ -83,8 +97,10 @@ static boolean isContracted(){
 
 private void separatorEncountered( boolean isSep ){
  capInfo.separatorEncountered( isSep );
+ KeepTrack2.separatorEncountered();
 }
 private String spaceEncountered( String ink ){
+ KeepTrack2.spaceEncountered( ink );
  StringBuilder after = new StringBuilder();
 
  //String endTag = SubSupIndicator.spaceEncountered();
@@ -99,9 +115,10 @@ private String spaceEncountered( String ink ){
  return after.toString();
 }
 private void spaceEncountered(){
+ KeepTrack2.spaceEncountered();
  System.out.println( "Space encountered...." );
  capInfo.separatorEncountered( true );
- info4KT.spaceEncountered4G1();
+ //info4KT.spaceEncountered4G1();
  //Grade1Indicator.spaceEncountered();
 }
 
@@ -155,6 +172,7 @@ public String numfragDone( String brl ){
  String ink = UpperNumber.getInk( brl );
  if (ink == null) return null; //Shouldn't happen?
     //String tag = SubSupIndicator.afterNumfrag();
+ KeepTrack2.numfragDone();
  String tag = info4KT.afterNumfrag();
  if (tag == null) return ink;
  StringBuilder buf = new StringBuilder( ink );
@@ -171,8 +189,17 @@ public String numfragDone( String brl ){
 //***********************************************
 public String backTrans( String brl, Trans btMethod ){
 
- if (trace) System.out.println( "KT.backTrans()--Some G1 mode active: "+
- info4KT.useGrade1() );
+ KeepTrack2.checkNumMode( brl );
+ KeepTrack2.checkSpecialG1Mode( brl );
+
+
+
+ if (traceG1){ 
+   boolean inGrade1Mode = KeepTrack2.useGrade1();
+   if (inGrade1Mode){
+     System.out.println( "KT.backTrans()--G1 mode is active. " );
+   }
+  }
 
   //IF_AFTER should go somewhere else
  if (btMethod != Trans.IF_AFTER ){
@@ -192,9 +219,10 @@ public String backTrans( String brl, Trans btMethod ){
    return addAfter( handleSAPostfix( brl ), brl );
   case INDICATOR:
    return backInd.processIndicators( brl );
-  //case NUMERIC_SEQ:  // Check for "vulgar fraction"  
-   //return numericMode( brl );
+  case NUMERIC_SEQ:  // Check for "vulgar fraction"  
+   return tryVulgFrac( brl );
   case NUMERIC_SYM:
+   System.out.println( "Keeptrack bt -- numericMode()");
    return numericMode( brl );
   case IF_AFTER:
    return afterSymbol( );
@@ -211,6 +239,8 @@ public String backTrans( String brl, Trans btMethod ){
   case SEPARATOR:
    return backTransSeparator( brl );
  }
+  System.out.println( "KeepTrac.BackTrans() --ERROR -- did not handle: "+
+   btMethod );
   return "";
 }
   
@@ -225,9 +255,11 @@ String brlDots( String brl ){
 // typeform and possibly script
 
 private String addAfter( String ink, String brl ){
- //check g1 mode
+ KeepTrack2.cancelG1SymbolMode();
  String after = finishSubSup( brl ); //script end tag
- System.out.println( "KT--addAfter: |"+after+"| brl:"+brl );
+ if (traceAfter){
+  System.out.println( "KT--addAfter: |"+after+"| brl:"+brl );
+ }
  StringBuilder buf = new StringBuilder();
  if (after != null){
   buf.append( ink );
@@ -260,6 +292,22 @@ private String addAfter( String ink, String brl ){
    TODO set special g1 mode
   */
 
+private String tryVulgFrac( String brl ){
+ String ink = UpperNumber.getVFrac( brl );
+ if (traceNum) System.out.println( "KT:numMode -- vfrac ink: "+ ink );
+
+ if (ink != null){
+  info4KT.setLastWasVulgarFraction();
+  if (traceG1) 
+   System.out.println( "G1 mode set by numeric mode start." );
+  KeepTrack2.setNumericMode( true );
+  backInd.processIndicators( g1SpecBrl );
+  return ink;
+ } else {
+  return "";
+ }
+}
+
 private String numericMode( String brl ){
 
  if (KeepTrack2.getDlMention( )) return handleMention( brl );
@@ -272,19 +320,9 @@ private String numericMode( String brl ){
  //sometimes a vulgar fraction in print. Could a
  //mixed number be used as a subscript or superscript?
  //    x<sup>21/2</2) where the 1/2 is a single character
- String ink = UpperNumber.getVFrac( brl );
- if (traceNum) System.out.println( "KT:numMode -- vfrac ink: "+ ink );
-
- if (ink != null){
-  info4KT.setLastWasVulgarFraction();
-  if (traceG1) 
-  System.out.println( "G1 mode set by numeric mode start." );
-   info4KT.setNumericMode( true );
-   backInd.processIndicators( g1SpecBrl );
-  return ink;
- }
 
  Indicator ind = backInd.check4Ind( brl );
+ System.out.println( "KT nummode--brl, ind: "+brl+" "+ind );
  // Note that some numeric symbols just represent numeric
  //signs in print but the 12 basic numeric (start) indicators
  //are both indicators and for numeric signs; these are addressed here.
@@ -411,6 +449,7 @@ private String backTransSeparator( String brl ){
  if (KeepTrack2.getDlMention() ) return handleMention( brl );
  String ink = Separator.backTrans( brl );
  if (ink == null) return ink;
+
  if (ink.equals( " ")){
    //Informs before inserting space
   String upInk = spaceEncountered( ink );

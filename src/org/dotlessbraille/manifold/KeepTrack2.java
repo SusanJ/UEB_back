@@ -1,6 +1,8 @@
 package org.dotlessbraille.manifold;
 import org.dotlessbraille.indicators.Persist;
 import org.dotlessbraille.indicators.EndScope;
+import org.dotlessbraille.indicators.Grade1Indicator;
+import org.dotlessbraille.indicators.Scope;
 
 
  //  Handles communication between BackInd
@@ -13,6 +15,7 @@ import org.dotlessbraille.indicators.EndScope;
 public class KeepTrack2{
 
  public static String g1SpecBrl = ";;;;";
+ static boolean traceCheck = false;
 
   //  Flag indicating that previous symbol was
   // a subscript or superscript indicator
@@ -23,15 +26,67 @@ public class KeepTrack2{
 
  static boolean inNumericMode = false;
  static boolean inSpecialG1Mode = false;
+ static boolean inG1SymbolMode = false;
  static Persist numModeSyms;
- static Endscope g1ModeSyms;
+ static EndScope g1ModeSyms;
+
+ public static String aSpace = " ";
+
+ //public static void spaceEncountered(){
+ //}
+
+public static void setPendingG1( Grade1Indicator g1Indy, Scope scope ){
+ //System.out.println( "KT2 -- supposed to set G1 with scope: "+scope);
+ switch (scope){
+  case NEXT_SIGN:
+   inG1SymbolMode = true;
+   return;
+  case SPECIAL:
+   inSpecialG1Mode = true;
+   return;
+  }
+  Grade1Indicator.setPending( g1Indy );
+  return;
+}
+
+ public static boolean useGrade1(){
+  if (inSpecialG1Mode) {
+   System.out.println( "KT2--special G1 active" );
+   return true;
+  }
+  if (inG1SymbolMode){
+   System.out.println( "KT2--G1 Symbol active" );
+   return true;
+  }
+  boolean g1indUse = Grade1Indicator.useGrade1();
+  System.out.println( "Grade1Ind report: "+g1indUse );
+  return g1indUse;
+ }
+ public static void spaceEncountered( String ink ){
+  checkSpecialG1Mode( ink );
+  checkNumMode( ink );
+ }
+ public static void separatorEncountered(){
+ }
+
+public static void spaceEncountered( ){
+  checkSpecialG1Mode( aSpace );
+  checkNumMode( aSpace );
+ }
  
+public static void numfragDone(){
+ System.out.println( "KT2 last nummode symbol, nummode off." );
+ inNumericMode = false;
+}
 
  //  If currently in numeric mode checks whether
  // input symbol allows numeric mode to continue
- static boolean checkNumMode( String brl ) {
+ public static boolean checkNumMode( String brl ) {
   if (!inNumericMode ) return false;
   inNumericMode = numModeSyms.allowed( brl );
+  if (!inNumericMode){
+   System.out.println( "brl: |"+brl+"| just ended numeric mode." );
+  }
    //There are some symbols that can turn both modes off
   if (!inNumericMode) checkSpecialG1Mode( brl );
   return inNumericMode;
@@ -40,24 +95,53 @@ public class KeepTrack2{
  //   If currently in SpecialG1Mode but no longer
  // in numeric mode checks whether
  // input symbol allows special g1 mode to continue
- static boolean checkSpecialG1Mode( String brl ) {
+  public static boolean checkSpecialG1Mode( String brl ) {
+
+  if (traceCheck){
+  System.out.println( "KT2-ckSpG1 nummode, specg1: "+inNumericMode+
+   " "+inSpecialG1Mode );}
+
   if (inNumericMode) return true;
   if (!inSpecialG1Mode ) return false;
+  if (traceCheck){
+   System.out.println( "KT2 checking brl: |"+brl+"|for G1 Mode" );
+  }
   inSpecialG1Mode = g1ModeSyms.allowed( brl );
+  if (!inSpecialG1Mode){
+   Grade1Indicator.clearSpecialG1();
+   System.out.println( "brl symbol: |"
+     +brl+"| just ended special G1 mode." );
+  }
   return inSpecialG1Mode;
  }
  
- static void setPersistForNumMode( Persist numModePersist ){
+  public static void cancelG1SymbolMode(){
+   if (inG1SymbolMode){
+    System.out.println( "KT2--going to cancel G1Sym. mode" );
+   }
+   inG1SymbolMode = false;
+   //Grade1Indicator.cancelG1SymbolMode();
+  }
+
+  public static void setPersistForNumMode( Persist numModePersist ){
    numModeSyms = numModePersist;
  }
 
- static void setNumericMode( boolean inNumMode ){
+  public static void setEndscopeForSg1Mode( EndScope sg1ModeEndscope ){
+  g1ModeSyms = sg1ModeEndscope;
+ }
+
+  public static void setNumericMode( boolean inNumMode ){
   inNumericMode = inNumMode;
   if( inNumericMode) inSpecialG1Mode = true;
  }
 
- static boolean getNumericMode( ){
+  public static boolean getNumericMode( ){
   return inNumericMode;
+ }
+
+ public static boolean getGrade1Mode( ){
+  return inSpecialG1Mode;
  }
 
  public static void setDlMention( boolean toSet ){

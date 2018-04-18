@@ -31,7 +31,7 @@ class SALetterBT{
  String backTransLetter( String aBrl, boolean grade2 ){
  if ( grade2 ){
    if (aBrl.length() !=1){
-     System.out.println( "SALetterBT grade2 not available." );
+     System.out.println( "SALetterBT grade2 not available for shortforms.." );
    } else {
      //Need to use cap info here!
      //Word.init();
@@ -72,12 +72,14 @@ String btSeq( String brl, boolean grade2 ){
   tc = true;
   is = 1;
  }
+ if (trace){
  System.out.println( "SALetterBT brl btSeq() tc, is: "
    +brl+" "+tc+" "+is );
+ }
 
  for (int i=is; i<brl.length(); i++){
   String tmp = brl.substring(i, i+1);
-  System.out.println( "SALetterBT brl letter: "+tmp );
+  if (trace) System.out.println( "SALetterBT brl letter: "+tmp );
   ink = Letter.backTrans( tmp );
   if (tc && i==is){
    ink = ink.toUpperCase() ;
@@ -88,7 +90,7 @@ String btSeq( String brl, boolean grade2 ){
      capInfo.getCapWordInd()   ){ 
    return buf.toString().toUpperCase();
  }
- System.out.println( "SALetterBT ink: "+buf.toString() );
+ if (trace) System.out.println( "SALetterBT ink: "+buf.toString() );
  return buf.toString();
 }
    
