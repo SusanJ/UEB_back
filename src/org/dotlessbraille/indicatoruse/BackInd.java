@@ -25,6 +25,7 @@ public class BackInd{
  CapsHandler capsHandler;
  boolean trace = true;
  boolean traceG1 = true;
+ boolean traceNum = false;
 
  //boolean dlMention = false;
 // boolean lastWasSubSup = false;
@@ -63,7 +64,7 @@ static boolean isContracted(){
    // ***Explicit (implemented) indicators***//
 //**********************************************
 public String processIndicators( String brl ){
-   if (trace) System.out.println( "Checkif ind: "+ brl );
+   if (trace) System.out.println( "BackInd--Check if ind: "+ brl );
    boolean isInd = false;
    Indicator indy = check4Ind( brl );
    if (indy == null) {
@@ -84,24 +85,35 @@ public Indicator check4Ind( String brl ){
  //hands over the information needed to handle the
  //the indicator portion. 
 public boolean handleNumericIndicator( String brl, Indicator ind ){
- System.out.println( "In BackInd.handleNumInd ind: " +ind );
+ if (traceNum){
+   System.out.println( "In BackInd.handleNumInd ind: " +ind );
+ }
+
  IndicatorClass ic = ind.myIndData.getMyClassEnum();
  if (ic != IndicatorClass.NUMERIC_INDICATOR) {
    System.out.println( " Error in numeric mode for braille: "+brl);
    System.out.println( "ic: "+ic );
    System.exit( 2 );
  }
- System.out.println( "In BackInd.handleNumInd" );
+ //System.out.println( "In BackInd.handleNumInd" );
+
  IndicatorType iType = ind.getIndType();
- System.out.println( "In BackInd.handleNumInd()--iType: "+ iType );
+
+ if (traceNum){
+   System.out.println( "In BackInd.handleNumInd()--iType: "
+                       + iType );
+ }
 
  if (iType == IndicatorType.NUMERIC_START){
-  if (traceG1) System.out.println( "G1 mode set by numeric mode start." );
+  KeepTrack2.setNumericMode( true );
+  if (traceG1) 
+   System.out.println( "BackInd.G1 mode to beset by numeric mode start." );
   processIndicators( KeepTrack2.g1SpecBrl );
   // return UpperNumber.getInk( brl );
   return true;
  }
  if (iType == IndicatorType.NUMERIC_TERMINATOR){
+   KeepTrack2.setNumericMode( false ) ;
    //Do something
    //return "";
  }
@@ -117,7 +129,7 @@ public boolean handleNumericIndicator( String brl, Indicator ind ){
 
 public String handleIndicator( Indicator indy ){
    IndicatorClass ic = indy.myIndData.getMyClassEnum();
-   System.out.println( "KT.handleInd.--IC: "+ic );
+   System.out.println( "BackInd.handleInd.--IC: "+ic );
      //Symbol mentioned as example, not actually used
    if (KeepTrack2.getDlMention()){
     System.out.println( "Indicator was mentioned; not active." );
@@ -141,15 +153,20 @@ public String handleIndicator( Indicator indy ){
       if (showDL) return brlDots( indy.getBrl() );
       return "";
     case GRADE1_INDICATOR:
-      if (traceG1) System.out.println( "Input is g1 indicator." );
+      if (traceG1) System.out.println( "BackInd.--Input is g1 indicator." );
       Grade1Indicator g1Indy = (Grade1Indicator) indy;
       Scope scope = g1Indy.getScope();
       if (scope == Scope.TERMINATOR){
         Grade1Indicator.handleTerminator( );
       } else {
+  //Oops -- special g1 set when num mode STARTs since it can
+  //end at same point as num mode and also both special g1
+  // and g1 symbol can be active at the same time!!!
         //Ensure numeric mode is off (grammar should do this!)
         //It needs to know about "endscope" guys 
-        Grade1Indicator.setPending( g1Indy );
+   System.out.println( "BackInd. g1_found scope: " + scope );
+        //Grade1Indicator.setPending( g1Indy );
+        KeepTrack2.setPendingG1( g1Indy, scope );
       }
     return "";
     case TYPEFORM_INDICATOR:
