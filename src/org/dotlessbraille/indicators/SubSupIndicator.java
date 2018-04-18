@@ -181,7 +181,8 @@ public static String afterAtEOL(){
 }
  //Check if the symbol just processed could be the
  //end of a script
-public static String getAfterTag( String nextBrl ){
+public static String getAfterTag( String nextBrl, boolean trace ){
+ if (trace)
  System.out.println( "SubSupInd.getATag()-- pending:"+pending+
                      " nextBrl: "+nextBrl );
  if (pending == null) return "";

@@ -52,6 +52,10 @@ Indicator( String brl, String name, Scope scope, int minItems ){
  add( this );
 }
 
+void setScope( Scope scope ){
+ this.scope = scope;
+}
+
 //  Special constructor for an imaginary indicator used
 // to represent a mode set by another mode, i.e.
 // when numeric modes sets G1 mode. The variable

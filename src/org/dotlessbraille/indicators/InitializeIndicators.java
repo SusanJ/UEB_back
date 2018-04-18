@@ -11,7 +11,7 @@ public static void makeIndicators( boolean report,
   DotLocatorIndicator.makeTranslationTable( report, details );
   Grade1Indicator.makeG1Inds( report, details );
   NumericIndicator.mayne( report, details );
-  SubSupIndicator.makeSubSupInds( true, details,
+  SubSupIndicator.makeSubSupInds( report, details,
                                   g1SymInd );
   TranscriberIndicator.makeTI_Table( report, details );
   TypeformIndicator.makeTfInds( report, details );

@@ -1,24 +1,43 @@
 package org.dotlessbraille.antlr;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+//import org.antlr.v4.runtime.*;
+//import org.antlr.v4.runtime.tree.*;
+
+import org.antlr.v4.runtime.BufferedTokenStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CodePointCharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStreamRewriter;
+
+//import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.dotlessbraille.transtables.KeepTrack;
 import org.dotlessbraille.indicatoruse.PendingCapInds;
 
 class BackPR{
 
  static String[] ruleNames;
- static boolean printTree = true;
  static boolean showRuleNames;
+
+ static boolean printTree = true;
  static boolean debugComments = false;
+ static boolean traceStandingAloneWord = true;
  static boolean trace = true;
  static boolean numDebug = false;
- static boolean printText = true;
+ static boolean printInputText = false;
  static boolean skipItem = true;
  static boolean ignoreComments = false;
  static boolean debug = false;
@@ -39,14 +58,14 @@ class BackPR{
    KeepTrack statusManager;
    BufferedTokenStream allTokens; //Support comment channel
    TokenStreamRewriter rewriter;
-   int lineNumber = 0;
+   //int lineNumber;
 
    Translator( KeepTrack statusManager, 
                BufferedTokenStream allTokens) {
     this.statusManager = statusManager;
     this.allTokens = allTokens;
     rewriter = new TokenStreamRewriter( allTokens );
-    lineNumber = 0;
+    //lineNumber = 0;
    }
 
 //  ===========BACKTRANSLATION ANNOTATIONS SAVED HERE============
@@ -71,18 +90,18 @@ class BackPR{
 @Override 
  public void enterText( simpleParser.TextContext ctx)  {
    System.out.println();
-   System.out.println( "        Starting Text..." );
-   System.out.println( "Text contains: "+ctx.getChildCount()+" lines." );
+   System.out.println( "        Starting to annote input: enterText ..." );
+   System.out.println( "Input contains: "+ctx.getChildCount()+" lines." );
   }
 
 @Override
  public void exitText( simpleParser.TextContext ctx)  {
-   System.out.println( "\n       Finishing Text..." );
-   if (printText) System.out.println( "brl: "+ctx.getText() );
+   System.out.println( "\n        Finishing up annotation: exitText..." );
+
+   if (printInputText) System.out.println( "brl: "+ctx.getText() );
    int cnt = ctx.getChildCount();
-   //System.out.println( "Text children count: "+ cnt );
   
-     //Concatenate lines
+     //Concatenate all lines (already annotated)
    String ink;
    StringBuilder buf = new StringBuilder();
    for (int i=0; i<cnt; i++){
@@ -96,15 +115,20 @@ class BackPR{
    setInk( ctx, buf.toString() );
  }//End exitText.
 
-  // 01. -->'line' is name grammar gives to root nodes children<--
+  // 01. -->'line' is phrase name grammar gives to root node children<--
 @Override
  public void enterLine( simpleParser.LineContext ctx ){
-   //Need to tell grammar about continued number
-   lineNumber = lineNumber + 1;
-   System.out.println( "\n         Starting "
-    +"line no. "+lineNumber );
-   System.out.println( "ASCII Braille input: "+ctx.getText() );
-   System.out.println( " numLineCont: "+numLineCont );
+
+   //statusManager.incrementLinesDone();
+   System.out.println( "\n         Starting enterLine for "
+                      +"line no. "+statusManager.getCurrentLineNumber() );
+   System.out.print( "ASCII Braille input: "+ctx.getText() );
+
+    // FIX FIX Need to tell grammar about continued number
+    //   and move this to status guy
+   if (numLineCont) {
+    System.out.println( " numLineCont: "+numLineCont );
+   }
    boolean contNum = false;
    //  Check whether previous line was a continued numeric item
    // such as a long number
@@ -115,25 +139,23 @@ class BackPR{
     contNum = false;
    }
 }
-
   
-
-     //NEED TO HAVE ITEM THAT IS A COMPLETE "WORD" FIX THIS!!!
 @Override
  public void exitLine( simpleParser.LineContext ctx ) {
 
-   System.out.println( "\n        Finishing current line..." );
-   System.out.println( "brl: "+ctx.getText() );
+   System.out.println( "\n         Finishing current line..." );
+   //System.out.println( "brl: "+ctx.getText() );
    int cnt = ctx.getChildCount();
    System.out.println( "No. of child nodes "+
-   "including any separator(s) and EOL: "+ cnt );
+           "including any separator(s) and EOL: "+ cnt );
+
    String cmtInfo = null;
    if (!ignoreComments){
     cmtInfo = lineComment( ctx, 2 );
    }
 
-   //Concatenate various items in this line; all (except EOF)
-   //should have been backtranslated at lower levels
+    //Concatenate various items in this line; all (except EOF)
+    //should have been backtranslated at lower levels
    String ink;
    StringBuilder buf = new StringBuilder();
    for (int i=0; i<cnt-1; i++){
@@ -141,13 +163,13 @@ class BackPR{
     if (ink != null) {
      buf.append( ink );
     } else {
-     System.out.println( "Line child item no. "+i+
-        " Braille was not backtranslated: "+
+     System.out.println( "Braille for this line's child item no. "+i+
+        "  was not backtranslated: "+
         "|"+ctx.getChild(i).getText()+"|" );
      buf.append( "" );  //Hmmm.....
     }
    } 
-
+   
     String after =
       statusManager.backTrans( "", KeepTrack.Trans.EOL_AFTER ); 
      if (after != null) {
@@ -161,9 +183,11 @@ class BackPR{
     }
    buf.append("\n");  //New line at end of line
    setInk( ctx, buf.toString() );
+   statusManager.incrementLinesDone();
  }//End exitLine.
 
 
+//NEED TO HAVE ITEM THAT IS A COMPLETE "WORD" ???
   // -->2.0 'numfrag' is one of several types of  
   //        symbols-sequences that can comprise a line-->
   // (Parser grammar knows valid numeric symbols !)
@@ -177,22 +201,35 @@ class BackPR{
   System.out.println( "    Braille input: "+ brl );
   String ink = null;
 
-    //Check entire sequence first in case it represents
+    //Check entire sequence first in case it could represent
     //an available Unicode character for vulgar fraction 
     //Parser grammar only returns 1- or 2-char seq??
     //If not backtranslator returns null
   if (brl.length() > 3 ){
     ink = statusManager.backTrans( brl, KeepTrack.Trans.NUMERIC_SEQ );
-    if (ink != null){
+    if (!ink.equals("")){
+     System.out.println( "Is a vulgar fraction." );
      setInk( ctx, ink );
    //statusManager.numfragDone( true ); //ALWAYS TRUE?
-    return;
-  }}
+     return;
+    } else {
+     System.out.println( "Input not a vulgar fraction." );
+    }
+  }
 
     //Back translate individual symbols
   StringBuilder buf = new StringBuilder();
   //String ink;
-  for (int i=0; i<cnt-1; i++){
+
+  boolean justInd = false;
+  int ix = cnt-1;
+    //Check for numeric fragment with just a start ind/symbol
+  if (cnt == 1){
+   justInd = true;
+   ix = cnt;
+  }
+   
+  for (int i=0; i<ix; i++){
    brl = ctx.getChild(i).getText();
    //ink = statusManager.numericMode( brl );
    ink =  statusManager.backTrans( brl, KeepTrack.Trans.NUMERIC_SYM);
@@ -201,14 +238,19 @@ class BackPR{
                             "translate braille: "+ brl );
         ink="|"+brl+"|";
    } else {
-       System.out.println( "brl: "+brl+" ink: "+ink );
+       System.out.println( "Numfrag result--brl: "+brl+" ink: "+ink );
    }
    setInk( ctx.getChild(i), ink );
    buf.append( ink );
   }
-  brl = ctx.getChild( cnt-1 ).getText();   
-  ink = statusManager.numfragDone( brl );
-  buf.append( ink );
+   //Last symbol done separately unless only symbol
+  
+  if (!justInd){
+   brl = ctx.getChild( cnt-1 ).getText();   
+   ink = statusManager.numfragDone( brl );
+   System.out.println( "Numfrag last result--brl: "+brl+" ink: "+ink );
+   buf.append( ink );
+  }
   setInk( ctx, buf.toString() );
  }
 
@@ -219,35 +261,37 @@ class BackPR{
 @Override
  public void exitStandingAlone(simpleParser.StandingAloneContext ctx){
 
-   System.out.println( "\n     exit ***StandingAlone***" );
+   System.out.println( "          Finishing standing alone item." );
  
-    //Concatenate
+     //Concatenate information from child nodes
    StringBuilder buf = new StringBuilder();
    int cnt = ctx.getChildCount();
    for (int i=0; i<cnt; i++){
     String ink = getInk( ctx.getChild(i));
     buf.append( ink );
    }
-   System.out.println( "StandAlone trans: "+buf.toString() );
+   System.out.println( "StandAlone backTranslation: "+buf.toString() );
    setInk( ctx, buf.toString() );
 }
 
 // -->3.0 'preAlone' are optional symbols and indicators whick
 //        can precede a standalone letter or letter sequence 
+//        Caps word indicator has its own grammar phrase.
 @Override 
  public void exitCapsWordInd(simpleParser.CapsWordIndContext ctx) {
-  System.out.println( "\n    ***exitCapsWordInd***" );
+  System.out.println( "\n    ***exitCapsWordInd4SA***" );
   String brl = ctx.getText();
   String ink =   //statusManager.processIndicators( brl );
    statusManager.backTrans( brl, KeepTrack.Trans.INDICATOR );
   setInk( ctx, ink );
  }
+
 @Override
  public void exitPreAlone(simpleParser.PreAloneContext ctx) { 
      System.out.println(
       "\n    ***finish any StandingAlone prefix ***" );
-     //Grammar defines each prefix symbol as a
-     //separate node, single token
+      //Grammar defines each prefix symbol as a
+      //separate node, single token
     String brl = ctx.getText();
     String ink =
      statusManager.backTrans( brl, KeepTrack.Trans.SA_PREFIX );
@@ -263,13 +307,16 @@ class BackPR{
 //        would be backtranslated as a shortform word.<--
 @Override 
  public void exitSaLetters(simpleParser.SaLettersContext ctx) {
-  System.out.println( "\n    ***exitSaLetters***" );            
+  if (traceStandingAloneWord){
+   System.out.println( "\n          Starting to handle standing alone word" ); 
+  }           
   String brl = ctx.getText();
   String ink =
    statusManager.backTrans( brl, KeepTrack.Trans.SA_SEQ );
-  //String ink = statusManager.backTransSAseq( brl );
-  System.out.println( "  brl: "+brl+" ink: "+ink );
-  setInk( ctx, ink );
+  if (traceStandingAloneWord){
+   System.out.println( "Backtranslated brl: "+brl+" to: "+ink );
+   setInk( ctx, ink );
+  }
  }
 
 // -->3.2 'postAlone' are optional symbols and indicators which
@@ -325,13 +372,14 @@ class BackPR{
 
 @Override
  public void exitRootlessToken(simpleParser.RootlessTokenContext ctx) { 
-  System.out.println( "  RootlessToken" );
+  System.out.println( "\n  Starting rootlessToken" );
   int cnt = ctx.getChildCount();
   String brl = ctx.getText();
   System.out.println( "Item count: "+cnt+" text: "+brl );
   String ink = //statusManager.backTransToken( brl );
        statusManager.backTrans( brl, KeepTrack.Trans.INDICATOR );
-  System.out.println( "Returned ink: "+ink );
+  System.out.println( "Returned ink: |"+ink+"|" );
+  setInk( ctx, ink );
 }
 
 
@@ -471,7 +519,7 @@ public void concat( ParserRuleContext ctx ){
  if (inputFile == null){
     System.out.println( "\n    -->Enter North Am. ASCII Braille." );
     System.out.println( "    -->End input with CTRL-z "+
-                      "as only symbol on last line." );
+                      "as only symbol on last line.\n" );
     Reader myReader = new InputStreamReader( System.in, "UTF-8");
     CodePointCharStream cpcs = CharStreams.fromReader( myReader );
     input = cpcs;
@@ -502,8 +550,12 @@ public void concat( ParserRuleContext ctx ){
          ParseTree tree = parser.text();
          if (printTree){
            System.out.println( "     PARSE TREE: ");
-           System.out.println( "      "+
+           System.out.printf( 
 	                 tree.toStringTree( parser ));
+           System.out.println();
+           String x = tree.toStringTree( parser);
+           System.out.println( wrap( x, 40) );
+           //System.out.println( wrap( tree.toStringTree( parser)), 40 );
          }
 
     //System.out.println( "(text\n "+" (line\n "+"  (item\n " );
@@ -516,9 +568,11 @@ public void concat( ParserRuleContext ctx ){
 
           PendingCapInds capInfo = new PendingCapInds();
           boolean uncontracted = true;   //SHOULD BE AN OPTION SOON
-          KeepTrack kt = new KeepTrack( capInfo, uncontracted );
-          kt.makeTables( true, false );
-           //Translator, i.e. annotator, must extend baseListener 
+
+       //Communication point for backtranslation
+          KeepTrack kt = new KeepTrack( capInfo, uncontracted, 0 );
+          kt.makeTables( false, false );
+           //Back translator, i.e. annotator, must extend baseListener 
           Translator bt = new Translator( kt, tokens );
           BackPR.setRuleNames();
      
@@ -529,8 +583,40 @@ public void concat( ParserRuleContext ctx ){
 
      System.out.println();
      System.out.println( "      ***Backtranslation***" );
-     System.out.println(" Back-translated print from tree: ");
+     System.out.println(" Back-translated print input from annotated tree: ");
      System.out.println( bt.getInk( tree ) );
 
  }//End Main.
+
+private static final String linebreak = "\n"; // or "\r\n";
+  //Found on stack
+public static String wrap(String string, int lineLength) {
+    StringBuilder b = new StringBuilder();
+    for (String line : string.split(Pattern.quote(linebreak))) {
+        b.append(wrapLine(line, lineLength));
+    }
+    return b.toString();
+}
+
+private static String wrapLine(String line, int lineLength) {
+    if (line.length() == 0) return linebreak;
+    if (line.length() <= lineLength) return line + linebreak;
+    String[] words = line.split(" ");
+    StringBuilder allLines = new StringBuilder();
+    StringBuilder trimmedLine = new StringBuilder();
+    for (String word : words) {
+        if (trimmedLine.length() + 1 + word.length() <= lineLength) {
+            trimmedLine.append(word).append(" ");
+        } else {
+            allLines.append(trimmedLine).append(linebreak);
+            trimmedLine = new StringBuilder();
+            trimmedLine.append(word).append(" ");
+        }
+    }
+    if (trimmedLine.length() > 0) {
+        allLines.append(trimmedLine);
+    }
+    allLines.append(linebreak);
+    return allLines.toString();
+}
 }//End Outer Class BackPR.

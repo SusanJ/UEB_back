@@ -1,6 +1,8 @@
 package org.dotlessbraille.indicators;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.dotlessbraille.manifold.KeepTrack2;
+
 public class NumericIndicator extends Indicator{
 
 static boolean debug = true;
@@ -125,7 +127,9 @@ static private void makeNumInds( String lead, String trailers,
  }//End for loop.
 
  Grade1Indicator.makeSpecialG1Ind( IndicatorClass.NUMERIC_INDICATOR );
- System.out.println( "   Made phantom indicator for G1 set by numeric mode. (1)" );
+ if (trace)
+ System.out.println( "   Made phantom indicator for G1 "+
+  "set by numeric mode. (1)" );
 
  if (trace) System.out.println( "Made a set of "+trailers.length()+
                      " Numerical Indicators." );
@@ -280,6 +284,7 @@ static void mayne( boolean report, boolean details ){
  // ArrayList<String> persist = makePersist( "\"", digits);
 
   Persist numericModeSymbols = new Persist( "numericMode" );
+  KeepTrack2.setPersistForNumMode( numericModeSymbols );
 
     //10 [decimal] digits
   for (int i=0; i<digits.length(); i++){
