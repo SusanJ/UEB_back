@@ -1,5 +1,7 @@
 parser grammar simpleParser;
 options { tokenVocab = simpleLexer; }
+tokens {LATIN_LETTER, FUN_NAME}
+@parser::header{ package org.dotlessbraille.antlr; }
 @parser::members{ boolean line_cont = false; }
 
 
@@ -7,11 +9,14 @@ options { tokenVocab = simpleLexer; }
  //structure.  Numeric mode included here. Also should do caps?
  //makes more work in tree annotator....
 
-//not correct to have two numfrags together but
-//they can intersperse with other items in general alphanumeric
+ //two adjacent numfrags? Seems yes in a mixed number?
+ //they can intersperse with other items in general alphanumeric
 
 text: (line)+;
-line:  ( space)* ( (standingAlone) |
+line:  (nemethStartDisplay|nemethEndDisplay)(NEM_NEWLINE|NEWLINE)
+       |(nemethStartInline|nemethEndInline)((nemSyms)+)(NEM_NEWLINE|NEWLINE)
+
+      |( space)* ( (standingAlone) |
                    (((numfrag)|(item)+)+)
                  )                            
                  ( (separator)+ 
@@ -19,41 +24,44 @@ line:  ( space)* ( (standingAlone) |
                      (((numfrag)|(item)+)+)
                    ) 
                  )*                            
-        (trailingSep)*NEWLINE            
+        (trailingSep)*NEWLINE
       | (space)*NEWLINE
       ;
 
 capsWordInd:    (DOT6)(DOT6);
 capsPassageInd: (DOT6)(DOT6)(DOT6);
+rootlessToken:   DOTS56;
 
-item: (capsPassageInd|capsWordInd|pr_token);
+nemethStartDisplay: START_DIS;
+nemethEndDisplay:   END_DIS;
+nemethStartInline: START_DIS;
+nemethEndInline:   END_DIS;
 
-space: SPACE;
+item: (capsPassageInd|capsWordInd|
+       rootlessToken|pr_token|scrip);
+
+space:  SPACE;
 hyphen: DOTS36;
-dash: DOT6 DOTS36;
+dash:   DOT6 DOTS36;
 long_dash: DOT5 DOT6 DOTS36;
 
-separator: (space|hyphen|dash|long_dash);
+separator:  (space|hyphen|dash|long_dash);
 trailingSep: separator;
 
-//HACKED 
-//Assuming that DOTS36 only a root in separators
-roots: (  //LETTER|     //26
-          DOTS36|
-        LOWER_ROOT|DOT2|DOTS23|
-        DOTS25|
-        DOTS256|DOTS235|DOTS236|DOTS2356|  //26+10 = 36
-        DOTS34|DOTS126|DOTS345|DOTS346|DOT3| //36+6=42
-        ROOT);    
+roots: (  //LETTER|     //26 represents by "letters"
+          DOTS36|       //1
+        LOWER_ROOT|     //2
+        DOT2|DOTS23|DOTS25| //3
+        DOTS256|DOTS235|DOTS236|DOTS2356|  //4
+        DOTS34|DOTS126|DOTS345|DOTS346|DOT3| //5
+        ROOT|
+        largeWords|DOTS16|DOTS1456|DOTS1256| //8
+        DOTS146|DOTS156);  //2  
+  
 
-//letters: (//LETTERM|LETTERX|LETTERY|LETTERZ|
-          //LETTERA|LETTERB|LETTERC|LETTERD|LETTERE|
-         // LETTERQ);
-
-letters: updigs|MOST_LETTERS;
-//saLetters: letters+;
+letters: updigs|MOST_LETTERS|LETTERK;
   //Title-case only, embedded cap would violate "standing alone" criteria
-saLetters: ((DOT6)?letters)(letters)*;
+saLetters: (letters)(letters)*;
 
 // could be (ucLetters)|(ucLetters)?letters+  single uc or uc? lc+
 
@@ -61,31 +69,44 @@ saLetters: ((DOT6)?letters)(letters)*;
 //         'n'|'o'|'p'|'q'|'r'|'s'|'t'|'u'|'v'|'w'|'x'|'y'|'z';
 
 ucLetters: DOT6(letters);
-prefix: (     //DOTS3456|
-         DOT4|DOT5|DOT6|DOTS45|
-         DOTS56|DOTS46|DOTS456);
+prefix:   (DOT4|DOT5|DOT6|DOTS45|DOTS56|
+           DOTS46|DOTS456|DOTS3456);
+largeWords: AND|FOR|OF|THE|WITH;  
+initLetCons: ILC5|ILC45|ILC456;
+ //The only shortform that uses a two-cell symbol
 
-pr_token: (prefix)?(roots|letters);
-//standingAlone: (preAlone)*((capsPassageInd|capsWordInd)?(saLetters)+)(postAlone)*;
+//Strong wordsigns: child shall this which out still 
+strong_ws: (DOTS16|DOTS146|DOTS1456|DOTS156|DOTS1256|DOTS34);
+       
+shortForms: BESF|CHSF|SHSF|STSF;
 
+  //should the capsPass ind be in preAlone?
 standingAlone: 
-(preAlone)*((capsPassageInd|capsWordInd)?(saLetters))(postAlone)*;
+  (preAlone)*
+  ( (capsPassageInd|capsWordInd|DOT6)? (strong_ws|saLetters|shortForms) )
+  (postAlone)*;
 
-//numeric_ind: DOTS3456;  // (DOT2|DOTS256|NUM_FRAG);
-//numeric_chars: DOT2|DOTS256|NUM_FRAG;
-  //numfrag: (numeric_ind (numeric_chars)*);
-
-//Line cont at end?  (DOT5(DOT5)?)?
-//What about (lost thought) ....
-
-
+pr_token: (largeWords|initLetCons|(prefix)?(roots|letters));
 updigs: (LETTERA|LETTERB|UPDIGS);
 numspacedig: (DOT5 updigs);
 //numind: {!line_cont}? ((DOTS3456) (UPDIGS| DOT2 | DOTS256 )) |
         //(UPDIGS| DOT2 | DOTS256 );
 
+
 numind: ((DOTS3456) (updigs| DOT2 | DOTS256 )); 
 numfrag: numind (updigs | DOT2 | DOTS256 | DOTS34 | numspacedig )*;
+
+nemInteger: (NEM0|NEM1|NEM2|NEM3|NEM4|NEM5)+;
+nemReal: (nemInteger NEM_DECPT (nemInteger)? )|
+         (NEM_DECPT nemInteger);
+nemOp: NEM_PLUS|NEM_MINUS|NEM_FACTORIAL;
+nemComp: NEM_EQUALS;
+nemId: LATIN_LETTER|LC_ID;
+nemOGroup: NEM_OFENCE|NEM_VBAR;
+nemCGroup: NEM_CFENCE;
+nemSyms: (nemInteger|nemReal|nemOp|nemComp
+         |nemOGroup|nemCGroup|nemId|NEM_SPACE
+         )+;
 
 //vulg1_half: (DOTS3456 LETTERA DOTS34 LETTERB);
 //vulg3_8:  (DOTS3456 'c' DOTS34 'h' );
@@ -107,6 +128,9 @@ numfrag: numind (updigs | DOT2 | DOTS256 | DOTS34 | numspacedig )*;
   tfStartIndicator: ((tfPrefix)(tfStartRoot));
   tfTermIndicator:  ((tfPrefix)(tfTermRoot));
 
+  tfSymbolInd: (tfPrefix DOTS23);
+  tfWordInd:   (tfPrefix DOT2);
+
 
 //LATER == more than one letter?
 
@@ -119,6 +143,14 @@ numfrag: numind (updigs | DOT2 | DOTS256 | DOTS34 | numspacedig )*;
 //g1: capLetter;
 //letters: (POSS_DIGIT|LETTER|capLetter);
 
+subsup:(DOTS56)(LOWER_ROOT);
+
+encl1: (DOT5 DOTS126)(pr_token)+(DOT5 DOTS345);
+encl2: (DOTS46 DOTS126)(pr_token)+(DOTS46 DOTS345);
+encl3: (DOTS456 DOTS126)(pr_token)+(DOTS456 DOTS345);
+
+ scrip: subsup(encl1|encl2|encl3);
+          
   preAlone: ( ((DOT5|DOTS46|DOTS456)DOTS126)|  // (  [  {
               ((DOTS456|DOTS45|DOT6)?DOTS236)| // opening quotes
               (DOT5 DOTS2356|DOT3)|            // non-dir quotes or apos 
@@ -191,19 +223,3 @@ word:   single    # StandingAlone
    opening typeform or capitals indicator (or an opening
    transcriber's note);
 */
-//leading: ((tfWordInd|tfPassageInd)?start_punc)|(start_punc)*(capsPassageInd|capsWordInd);
-
-//INCOMPLETE
-//leading: start_punc;
-
-// Keep start_separate from caps indicators -- just use one trans table!
-//leading:  (start_punc)+(capsPassageInd|capsWordInd)?  //one or more punc + opt caps ind
-         // |(capsPassageInd|capsWordInd);
-
-
-
-
-
-
-
-
