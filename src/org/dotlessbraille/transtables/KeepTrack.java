@@ -1,28 +1,28 @@
 package org.dotlessbraille.transtables;
 
-import java.util.Stack;
+//import java.util.Stack;
+//import org.dotlessbraille.indicatoruse.CapsHandler;
+//import org.dotlessbraille.indicatoruse.TypeformsHandler;
+
+import org.antlr.v4.runtime.tree.ParseTree;
+
 import org.dotlessbraille.indicatoruse.BackInd;
 import org.dotlessbraille.indicatoruse.PendingCapInds;
-import org.dotlessbraille.indicatoruse.CapsHandler;
 import org.dotlessbraille.indicators.Indicator;
-import org.dotlessbraille.indicatoruse.TypeformsHandler;
+import org.dotlessbraille.indicators.InitializeIndicators;
+import org.dotlessbraille.manifold.KeepTrack2;
 
-
-//Should be implementing Status??
-//Working on single point of inter-token communication
-// This class manages all backtranslation and any 
-//communication among symbols
+// This class manages  backtranslation of symbols and any 
+//communication with BackInd
 
 public class KeepTrack{ 
  
- // Tree walker uses these enums to request appropriate
- //backtranslation            
+ //  Tree walker uses these enums to request appropriate
+ // backtranslation process based on parser grammar         
  public enum Trans { SA_PREFIX, SA_SEQ, SA_POSTFIX, INDICATOR, 
-              NUMERIC_SEQ, NUMERIC_SYM, LAST_NUMERIC_SYM,
-              IF_AFTER, EOL_AFTER, GENERIC_TOKEN, SEPARATOR }
-
- //static String brlOpenGroup = "<";
- //static String brlCloseGroup = ">";
+                     NUMERIC_SEQ, NUMERIC_SYM, LAST_NUMERIC_SYM,
+                     IF_AFTER, EOL_AFTER, GENERIC_TOKEN, SEPARATOR,
+                     NEM_DISPLAY_IND, NEM_INLINE_IND }
 
   //Uncontracted braille uses no contractions
   //Grade 1 is a mode in contracted braille
@@ -30,63 +30,63 @@ public class KeepTrack{
 
  public static String g1SpecBrl = ";;;;";
  public static String g1SymInd = ";";
- //boolean trace = true;
+ 
  boolean showUseDLinInk = true;
  boolean showMenDLinInk = true;
 
+ boolean trace = true;
+ boolean traceG1 = true;
+ boolean traceNum = false;
+ boolean traceSA = false;
+ boolean traceAfter = false;
 
+ //boolean nummode = false;
+ //boolean defaultUEB = true;
+ //boolean dlMention = false;
+ //boolean lastWasSubSup = false;
+
+ boolean wwContractions = true;
+ boolean showDL = true;
  
- 
+ PendingCapInds capInfo;
  LetterBT letterBT;
  SALetterBT saLetterBT;
- PendingCapInds capInfo;
- CapsHandler capsHandler;
+ //CapsHandler capsHandler;
 
- boolean traceG1 = true;
- boolean nummode = false;
- boolean defaultUEB = true;
- boolean trace = true;
- boolean wwContractions = true;
- boolean dlMention = false;
- boolean showDL = true;
- boolean lastWasSubSup = false;
+ BackInd backInd;
+ Info4KT info4KT = new Info4KT();
 
- private boolean isOpenEncl( String brl ){
-  return false;
- }
- private boolean isCloseEncl( String brl ){
-  return false;
- }
-
- //Last numeric character, backtrans and check
- //if it terminates a script
-public String numfragDone( String brl ){
- String ink = UpperNumber.getInk( brl );
- if (ink == null) return null;
- //String tag = SubSupIndicator.afterNumfrag();
- String tag = info4KT.afterNumfrag();
- if (tag == null) return ink;
- StringBuilder buf = new StringBuilder( ink );
- return buf.append( tag).toString();
-  //Imaginary token used to ensure g1 flags set
- //processIndicators( g1SpecBrl );
-
-}
-BackInd backInd;
-Info4KT info4KT = new Info4KT();
+     //====Constructor====//
  
  public KeepTrack( PendingCapInds capInfo,
-            boolean isUncontracted ){
+                   boolean isUncontracted,
+                   int linesDone ){
   this.capInfo = capInfo;
   this.letterBT = new LetterBT( capInfo );
-  this.saLetterBT = new SALetterBT( capInfo );
-  capsHandler = new CapsHandler( capInfo );
+  this.saLetterBT = new SALetterBT( capInfo, traceSA );
+  //capsHandler = new CapsHandler( capInfo );
   setUncon( isUncontracted );
-  BackInd backInd = new BackInd ( capInfo,
-          isUncontracted );
+  Info4KT.setLinesDone( linesDone );
+  backInd = new BackInd ( capInfo,
+                          isUncontracted );
  }
 
            //**Communication**//
+
+public void incrementLinesDone(){
+ Info4KT.incLinesDone();
+}
+public int getLinesDone(){
+ return Info4KT.getLinesDone();
+}
+public int getCurrentLineNumber(){
+ return getLinesDone()+1;
+}
+
+void setLastWasSubSup( boolean toSet ){
+ System.out.println( "KT--Set lastWasSubSup: "+toSet );
+ KeepTrack2.setLastWasSubSup( toSet );
+}
 
 static void setUncon( boolean isUncon ){
   uncontracted = isUncon;
@@ -97,32 +97,39 @@ static boolean getUncon(){
 static boolean isContracted(){
  return !uncontracted;
 }
-private void separatorEncountered( boolean isSep){
+
+private void separatorEncountered( boolean isSep ){
  capInfo.separatorEncountered( isSep );
+ KeepTrack2.separatorEncountered();
 }
 private String spaceEncountered( String ink ){
+ KeepTrack2.spaceEncountered( ink );
  StringBuilder after = new StringBuilder();
+
  //String endTag = SubSupIndicator.spaceEncountered();
  String endTag = info4KT.spaceEncountered4SS();
- System.out.println( "KT.spaceEnc -- SS endTag: "+ endTag );
+ System.out.println( "KT.spaceEnc. -- SS endTag: "+ endTag );
  if (endTag != null) after.append( endTag );
- String tfEndStack = TypeformsHandler.tfEndTagsAfterWord();
+
+ //String tfEndStack = TypeformsHandler.tfEndTagsAfterWord();
+ String tfEndStack = info4KT.tfEndTagsAfterWord();
  if (tfEndStack != null) after.append( tfEndStack );
  after.append( ink );
  return after.toString();
 }
 private void spaceEncountered(){
+ KeepTrack2.spaceEncountered();
  System.out.println( "Space encountered...." );
  capInfo.separatorEncountered( true );
- info4KT.spaceEncountered4G1();
+ //info4KT.spaceEncountered4G1();
  //Grade1Indicator.spaceEncountered();
 }
 
 private String afterSymbol(){
- String ink = TypeformsHandler.afterSymbol();
+ String ink = info4KT.tfAfterSymbol();
+ //String ink = TypeformsHandler.afterSymbol();
  //return TypeformsHandler.afterSymbol();
  return ink;
-
 }
 
  //   A subscript or superscript indicator
@@ -132,22 +139,26 @@ private String afterSymbol(){
  // terminated by the end of a numeric item or a space.
  // (There are additional possibilites for technical
  // material not addressed here.)
+ //  If subsub start just encountered checks for
+ // open fence and supplies matching close
 private void updateSubSup( String brl ){
- System.out.println( "KT update lastWasSubsup: "+ lastWasSubSup );
- if (!lastWasSubSup) return;
+ System.out.println( "KT updateSS lastWasSubsup: "+
+ KeepTrack2.getLastWasSubSup() );
+ if (!KeepTrack2.getLastWasSubSup()) return;
  System.out.println( "KT: updateSS brl: "+brl );
  String close = Punctuation.ifPreGetPost( brl );
  if (close != null){
-  System.out.println( "close: "+close );
+  System.out.println( "matching close: "+close );
   //SubSupIndicator.setWaitingFor( close );
   info4KT.setWaitingFor( close );
  }
- lastWasSubSup = false;
+ //lastWasSubSup = false;
+ setLastWasSubSup( false );
 }
 
  //Checks whether the just-translated input is
  //the matching close indicator for a
- //pending script
+ //pending (single-level) subscript or superscript
 private String finishSubSup( String brl ){
  //return SubSupIndicator.getAfterTag( brl );
  return info4KT.getAfterTagSS( brl );
@@ -157,55 +168,93 @@ private void finishSubSup( ){
  if (!info4KT.subSupIsPending()) return;
 }
 
+public String backTrans( String brl, Trans btMethod, ParseTree ctx ){
+  return backTrans( brl, btMethod );
+}
 
-//***********************************************
-   // Main entry point for all backtranslation of
-   //braille symbols that represent print signs
-   //Uses information supplied parse tree walker
-   // Items that might possibly be indicators
-   //passed to the indicator logic by the 
-   //relevant item method
-//***********************************************
+     //Invoked by tree walker
+  // Last numeric character, backtrans and check
+  //if it terminates a script
+public String numfragDone( String brl ){
+ String ink = UpperNumber.getInk( brl );
+ if (ink == null) return null; //Shouldn't happen?
+    //String tag = SubSupIndicator.afterNumfrag();
+ KeepTrack2.numfragDone();
+ String tag = info4KT.afterNumfrag();
+ if (tag == null) return ink;
+ StringBuilder buf = new StringBuilder( ink );
+ return buf.append( tag ).toString();
+}
+
+/** ***********************************************
+     Main entry point for all backtranslation of
+    braille symbols 
+     Uses information (via btMethod) supplied by 
+    parse tree walker to choose appropriate method
+     Symbols that are found to be indicators
+    are passed to the indicator logic in BackInd  
+    by the method responsible for backtranslating 
+    non-indicators symbols in the category
+   *************************************************
+*/
 public String backTrans( String brl, Trans btMethod ){
 
-  System.out.println( "KT.backTrans()--Some G1 mode active: "+
-  //Grade1Indicator.useGrade1() );
-  info4KT.useGrade1() );
+ KeepTrack2.checkNumMode( brl );
+ KeepTrack2.checkSpecialG1Mode( brl );
+ if (traceG1){ 
+   boolean inGrade1Mode = KeepTrack2.useGrade1();
+   if (inGrade1Mode){
+     System.out.println( "KT.backTrans()--G1 mode is active. " );
+   }
+  }
+
   //IF_AFTER should go somewhere else
  if (btMethod != Trans.IF_AFTER ){
-  updateSubSup( brl );
+  if (KeepTrack2.getLastWasSubSup()) updateSubSup( brl );
  }
+
  switch (btMethod){
   case SA_PREFIX:
-    //Standalone is strict grammar, might be a start ind.
-   System.out.println(  "KT.backTrans()--SA_PREFIX" );
+    //Standalone uses strict parser grammar, might be a start ind.
+   if (trace) System.out.println(  "KT.backTrans()--SA_PREFIX" );
    Indicator indToken = checkSAPrefix( brl );
    if (indToken != null) return saPrefixInd( indToken );
    return addAfter( handleSAPrefix( brl ), brl );
   case SA_SEQ:
    return addAfter( backTransSAseq( brl ), brl );
   case SA_POSTFIX:
+   indToken = checkSAPostfix( brl );
+   if (indToken != null) return saPostfixInd( indToken );
+   //System.out.println(  "KT.backTrans()--SA_POSTFIX INDY???" );
    return addAfter( handleSAPostfix( brl ), brl );
   case INDICATOR:
    return backInd.processIndicators( brl );
-  case NUMERIC_SEQ:  // Check for "vulgar fraction"
-   return numericMode( brl );
+  case NEM_DISPLAY_IND:
+  case NEM_INLINE_IND:
+   System.out.println( "KeepTrack--going to process Nemeth ind." );
+   return backInd.processIndicators( brl );
+  case NUMERIC_SEQ:  // Check for "vulgar fraction"  
+   return tryVulgFrac( brl );
   case NUMERIC_SYM:
+   if (traceNum) System.out.println( "Keeptrack bt -- numericMode()");
    return numericMode( brl );
   case IF_AFTER:
    return afterSymbol( );
   case EOL_AFTER:
-   //String ssEnd = SubSupIndicator.afterAtEOL();
+      //String ssEnd = SubSupIndicator.afterAtEOL();
    String ssEnd = info4KT.afterAtEOL();
-   return TypeformsHandler.afterAtEOL( ssEnd );
+   return info4KT.tfAfterAtEOL( ssEnd );
+   //return TypeformsHandler.afterAtEOL( ssEnd );
   case GENERIC_TOKEN:
    String ink =  backInd.processIndicators( brl );
-   //System.out.println( "KeepTrack bt token: |"+ink+"|");
+     //System.out.println( "KeepTrack bt token: |"+ink+"|");
    if (ink != null) return ink;
    return addAfter( backTransToken( brl ), brl );
   case SEPARATOR:
    return backTransSeparator( brl );
  }
+  System.out.println( "KeepTracd.BackTrans() **ERROR** did not handle: "+
+   btMethod );
   return "";
 }
   
@@ -220,9 +269,11 @@ String brlDots( String brl ){
 // typeform and possibly script
 
 private String addAfter( String ink, String brl ){
- //check g1 mode
+ KeepTrack2.cancelG1SymbolMode();
  String after = finishSubSup( brl ); //script end tag
- System.out.println( "KT--addAfter: |"+after+"| brl:"+brl );
+ if (traceAfter){
+  System.out.println( "KT--addAfter: |"+after+"| brl:"+brl );
+ }
  StringBuilder buf = new StringBuilder();
  if (after != null){
   buf.append( ink );
@@ -234,7 +285,7 @@ private String addAfter( String ink, String brl ){
    return buf.toString();
   }
  }
- after = afterSymbol(); //Any TF end tags
+ after = afterSymbol(); //No subsup, any TF end tags?
  if (after == null) return ink;
  buf.append( ink );
  return buf.append( after ).toString();
@@ -242,76 +293,61 @@ private String addAfter( String ink, String brl ){
 
             //**Numeric mode**//
 
-  //  The parser grammar recognizes this sequence as 1. numeric mode.
-  //numind: ((DOTS3456) (updigs| DOT2 | DOTS256 )); 
-  //numfrag: numind (updigs | DOT2 | DOTS256 | DOTS34 | numspacedig )*;
+  /** The parser grammar recognizes this sequence as 1. numeric mode.
+  numind: ((DOTS3456) (updigs| DOT2 | DOTS256 )); 
+  numfrag: numind (updigs | DOT2 | DOTS256 | DOTS34 | numspacedig )*;
 
-  //  There seems to be other numeric cases not addressed here.
-  //2. Numeric passage/terminator Rulebook Sec. 6.9
-      //Mainly used for worked examples
-      //Sets grade 1 (no contractions) and letters a-j 
-      //must each[?] a leading dots-56
-  //3. The spaced numeric indicator
-  //TODO set special g1 mode
+    There seems to be other numeric cases not addressed here.
+  2. Numeric passage/terminator Rulebook Sec. 6.9
+      Mainly used for worked examples
+      Sets grade 1 (no contractions). Anyetters a-j 
+      must each[?] a leading dots-56.
+  3. The spaced numeric indicator
+   TODO set special g1 mode
+  */
+
+private String tryVulgFrac( String brl ){
+ String ink = UpperNumber.getVFrac( brl );
+ if (traceNum) System.out.println( "KT:numMode -- vfrac ink: "+ ink );
+
+ if (ink != null){
+  info4KT.setLastWasVulgarFraction();
+  if (traceG1) 
+   System.out.println( "G1 mode set by numeric mode start." );
+  KeepTrack2.setNumericMode( true );
+  backInd.processIndicators( g1SpecBrl );
+  return ink;
+ } else {
+  return "";
+ }
+}
 
 private String numericMode( String brl ){
 
- if (dlMention) return handleMention( brl );
+ if (KeepTrack2.getDlMention( )) return handleMention( brl );
 
- // "Vulgar fractions" need to be backtranslated in
- // entirety but always start with a numeric indicator.
- //Grammar does recognize them at a lower level
- //But using this might complicate unnecessarily?
- String ink = UpperNumber.getVFrac( brl );
- System.out.println( "KT:numMode -- vfrac ink: "+ ink );
-
- if (ink != null){
-  if (traceG1) System.out.println( "G1 mode set by numeric mode start." );
-  backInd.processIndicators( g1SpecBrl );
-  return ink;
- }
+ //  "Vulgar fractions" need to be backtranslated in
+ //   entirety but always start with a numeric indicator.
+ //  Not clear if they can end a sub-sup
+ //  RuleBook 11.3.2 Mixed numbers should be treated as 
+ //two unspaced numeric items. The fraction part is
+ //sometimes a vulgar fraction in print. Could a
+ //mixed number be used as a subscript or superscript?
+ //    x<sup>21/2</2) where the 1/2 is a single character
 
  Indicator ind = backInd.check4Ind( brl );
- // Note that some numeric symbols sjust represent numeric
+ if (traceNum){
+  System.out.println( "KT nummode--brl, ind: "+brl+" "+ind );
+ }
+ // Note that some numeric symbols just represent numeric
  //signs in print but the 12 basic numeric (start) indicators
- //are also symbols for numeric signs; these are addressed here.
+ //are both indicators and for numeric signs; these are addressed here.
  if (ind != null){
     boolean upNum = backInd.handleNumericIndicator( brl, ind );
  }
  //Just a numeric symbol, not (also) an indicator
  return UpperNumber.getInk( brl );
 }
-
-/**  Commented out stuff moved to BackInd;
-private String handleNumericIndicator( String brl, Indicator ind ){
- IndicatorClass ic = ind.myIndData.getMyClassEnum();
- if (ic != IndicatorClass.NUMERIC_INDICATOR) {
-   System.out.println( "Error in numeric mode for braille: "+brl);
-   System.exit( 2 );
- }
- System.out.println( "in KT.handleNumInd" );
- IndicatorType iType = ind.getIndType();
- System.out.println( "KT.handleNumInd()--iType: "+ iType );
- if (iType == IndicatorType.NUMERIC_START){
-  if (traceG1) System.out.println( "G1 mode set by numeric mode start." );
-  processIndicators( g1SpecBrl );
-  return UpperNumber.getInk( brl );
- }
- if (iType == IndicatorType.NUMERIC_TERMINATOR){
-   //Do something
-   return "";
- }
- if (iType == IndicatorType.NUMERIC_CONTINUE){
-   //Do something
-   return "";
- }
- //The spaced numeric indicators and the numeric passage
- //indicator have special behavior  FIX THIS
-
- return "";
-} 
-*/
-
 
           //***Standing Alone***//
   //Parser recognizes standing alone constructs
@@ -325,149 +361,58 @@ private String handleNumericIndicator( String brl, Indicator ind ){
   return ind;
  }
  private String  saPrefixInd( Indicator ind ){
+   //capInfo.notALetter( brl );
    String fromInd = backInd.handleIndicator( ind );
    System.out.println( "KT.handleSAPre--fromInd: "+fromInd );
    return fromInd;
- 
- }
- //Prefix can contain indicators as well as symbols
+ } 
+
+  //Prefix can contain indicators as well as symbols
+  //Taken care of by backTrans entry point
  private String handleSAPrefix( String brl ){
-  Indicator ind = backInd.check4Ind( brl );
-  if (ind != null) {
-   String fromInd = backInd.handleIndicator( ind );
-   System.out.println( "KT.handleSAPre--fromInd: "+fromInd );
-   return fromInd;
-  }
-  if (dlMention) return handleMention( brl );
+  if (KeepTrack2.getDlMention()) return handleMention( brl );
   return StandingAlone.backPre( brl );
  }
 
-  //A Latin letter or sequence corresponding to a
+  //A Latin letter or a sequence corresponding to a
   //shortform that is "standing alone"
   //G1--Affected by a pending g1 start indicator
   // FIX CON/UNCON flag???
  private String backTransSAseq( String brl ){
-  if (dlMention) return handleMention( brl );
+  if (KeepTrack2.getDlMention()) return handleMention( brl );
   String ink = saLetterBT.backTransLetter( brl, wwContractions );
-  // Per the parser grammar this is the entire sequence and thus  
-  // the last of any letters before the postfix or separator. Any 
-  // non-alphabetic symbols are part of the postfix.
+    //  Per the parser grammar this is the entire sequence and thus  
+    // the last of any (print) letters before the postfix or separator. 
+    // Any non-alphabetic symbols are part of the allowed postfix.
   capInfo.clearCapWordInd();
   return ink;
   }
   
-  //  Symbols allowed after letter(s) that
-  //are considered to be "standing alone"
-private String handleSAPostfix( String brl ){
+  //   Symbols, including certain indicators,
+  // allowed after possible whole word and
+  // shortform contractions that
+  // are considered to be "standing alone"
+ private Indicator checkSAPostfix( String brl ){
   Indicator ind = backInd.check4Ind( brl );
-  if (ind != null) return backInd.handleIndicator( ind );
-  if (dlMention) return handleMention( brl );
+  return ind;
+ }
+private String saPostfixInd( Indicator ind ){
+   String fromInd = backInd.handleIndicator( ind );
+   System.out.println( "KT.handleSAPosts--fromInd: "+fromInd );
+   return fromInd;
+ } 
+private String handleSAPostfix( String brl ){
+  //Indicator ind = backInd.check4Ind( brl );
+  //if (ind != null) return backInd.handleIndicator( ind );
+  if (KeepTrack2.getDlMention()) return handleMention( brl );
   return StandingAlone.backPost( brl );
  }
 
-//**********************************************
-   // ***Explicit (implemented) indicators***//
-//**********************************************
-
-/**
-private String processIndicators( String brl ){
-   if (trace) System.out.println( "Checkif ind: "+ brl );
-   boolean isInd = false;
-   Indicator indy = check4Ind( brl );
-   if (indy == null) {
-    if (trace) System.out.println( "Not an indicator." );
-    return (String) null;
-   }
-   return handleIndicator( indy );
-}
-Indicator check4Ind( String brl ){
- Indicator indy = Indicator.getInd( brl );
- return indy;
-}
-
-private String handleIndicator( Indicator indy ){
-   IndicatorClass ic = indy.myIndData.getMyClassEnum();
-   System.out.println( "KT.handleInd.--IC: "+ic );
-     //Symbol mentioned as example, not actually used
-   if (dlMention){
-    System.out.println( "Indicator was mentioned; not active." );
-    dlMention = false;  //ASSUMED SCOPE
-    return brlDots( indy.getBrl() );
-   }
-   switch( ic ){
-    case CAPITALIZATION_INDICATOR:
-     System.out.println( "Input is cap ind." );
-     capsHandler.handleCapIndicator( (CapsIndicator) indy );
-     System.out.println( "capInfo capwordind: "+
-            capInfo.getCapWordInd() );
-     System.out.println( "capInfo cappassind: "+
-          capInfo.getCapPassInd() );
-     return "";
-    case DOT_LOCATOR:
-      DotLocatorIndicator dl = (DotLocatorIndicator)indy;
-      if (DotLocatorIndicator.isMention( dl )){
-        dlMention = true;
-      }
-      if (showDL) return brlDots( indy.getBrl() );
-      return "";
-    case GRADE1_INDICATOR:
-      if (traceG1) System.out.println( "Input is g1 indicator." );
-      Grade1Indicator g1Indy = (Grade1Indicator) indy;
-      Scope scope = g1Indy.getScope();
-      if (scope == Scope.TERMINATOR){
-        Grade1Indicator.handleTerminator( );
-      } else {
-        //Ensure numeric mode is off (grammar should do this!)
-        //It needs to know about "endscope" guys 
-        Grade1Indicator.setPending( g1Indy );
-      }
-    return "";
-    case TYPEFORM_INDICATOR:
-     System.out.println( "KT.handleInd.--Input is tf ind." );
-     TypeformIndicator tfIndy = (TypeformIndicator) indy;
-     scope = tfIndy.getScope();
-     if (scope == Scope.TERMINATOR){
-       return TypeformsHandler.endTag( tfIndy );
-     } else {
-          //1. Makes indicator active if valid
-       boolean ok = tfIndy.setMe();
-        //Oops, an indicator in this set was already active
-       if (!ok) return "";
-
-        //2. Adds indicator to correct stack for
-        //  getting its end tag when required later
-       TypeformsHandler.addToStack( tfIndy );
-
-        //3. and now supplies start tag to backtranslator
-       return tfIndy.getStartTag();
-     }
-   case TRANSCRIBER_INDICATOR:
-    System.out.println( "Input is tf ind." );
-    return ((TranscriberIndicator) indy).getInk();
- 
-   case SUBSUP_INDICATOR:
-    //need to return start tag and also
-    //keep checking scope
-    SubSupIndicator ssIndy = (SubSupIndicator) indy;
-     //Set as pending when identified as an indicator ???
-    SubSupIndicator.setPending( ssIndy );
-    lastWasSubSup = true;
-    return SubSupIndicator.getPendingStartTag();
-   }
-   System.out.println( "Warning -- logic error in indicator process." );
-   return "";
-}
-*/
-
         // ***Generic token per parser grammar*** //
- //Possibility of indicator handled by caller 
+        // Indicator cheeck handled by caller 
  private String backTransToken( String brl ) {
-  //String ink =  processIndicators( brl );
-  //System.out.println( "KeepTrack bt token: |"+ink+"|");
-  //if (ink != null) return ink;
-
-  //What if "" for some indicators?
-
+ 
+ if (KeepTrack2.getDlMention()) return handleMention( brl );
  //Most prefix root symbols are a single braille symbol
  //but might also be a one-cell symbol indicator
  //follwed by a one-cell symbol???
@@ -477,19 +422,24 @@ private String handleIndicator( Indicator indy ){
     //do something
    }
   }
+
   String ink;
-  if (trace){
+  boolean isALetter = Letter.isLetter( brl );
+
+  if (isALetter){
+   if (trace){
     System.out.println( "KeepTrack, will try input: "+
                          brl+" as letter." );
-  }
-
-  if (dlMention) return handleMention( brl );
-  //G1--Affected by a pending g1 start indicator
+    }
+  //  FIX ??? G1--Affected by a pending g1 start indicator
   ink = backTransLetter( brl );
   if (ink != null) return ink;
+  }
+
   if (trace){
     System.out.println( "KeepTrack, not letter trying as AnyPunc." );
   }
+  capInfo.notALetter( brl );
   ink = anyPunc( brl );
   if (ink == null){
    System.out.println( "KeepTrack--WARNING: cannot backtrans "+
@@ -511,7 +461,7 @@ private String handleIndicator( Indicator indy ){
 }
 
 private String handleMention( String brl ){
-  dlMention = false;  //ASSUMED SCOPE
+  KeepTrack2.setDlMention( false );  //ASSUMED SCOPE
   return brlDots( brl );
 }
 
@@ -526,12 +476,15 @@ private String anyPunc( String brl ){
 
 
 private String backTransSeparator( String brl ){
- if (dlMention) return handleMention( brl );
+ if (KeepTrack2.getDlMention() ) return handleMention( brl );
  String ink = Separator.backTrans( brl );
  if (ink == null) return ink;
+
  if (ink.equals( " ")){
-  //Informs before inserting space
-  return spaceEncountered( ink );
+   //Informs before inserting space
+  String upInk = spaceEncountered( ink );
+  System.out.println( "KT.BackTransSep upink |"+upInk+"|");
+  return upInk;
  } else {
    separatorEncountered( true );
  }
@@ -539,7 +492,8 @@ private String backTransSeparator( String brl ){
 }
 public static void makeTables( boolean report, boolean display ){ 
  InitTranstables.makeTables( report, display );
- System.out.println( "CANNOT DO THIS!");
+ InitializeIndicators.makeIndicators( report,
+                  display, g1SymInd );
 } 
 
 }//End Class.

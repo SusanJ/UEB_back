@@ -65,8 +65,8 @@ static String getInk( String brl){
   return upperNumBtTable.get( brl );
 }
 static String getVFrac( String brl ){
-  System.out.println( "UpNum--getVFrac table size: "+
-   specialFracTable.size()+" brl: "+brl );
+  //System.out.println( "UpNum--getVFrac table size: "+
+  // specialFracTable.size()+" brl: "+brl );
   return specialFracTable.get( brl );
 }
 

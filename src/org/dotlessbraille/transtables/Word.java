@@ -5,6 +5,7 @@ public class Word{
            /**Single-cell words array. */
 
 //   "single-cell whole words including 'a', 'i' and 'o'" )
+// and the six "strong wordsigns"
  public static final Word [] singleCellWords = {
   new Word( "a", "a", "a" ),  
   new Word( "&#x00CC;", "b", "but" ),
@@ -32,7 +33,6 @@ public class Word{
   new Word( "&#x00E0;", "x", "it" ),
   new Word( "&#x00E1;", "y", "you" ),
   new Word( "&#x00E2;", "z", "as" ),
-
   new Word( "&#x00B5;", "%", "shall" ),
   new Word( "&#x00B6;", "*", "child" ),
   new Word( "&#x00B7;", "/", "still" ),
@@ -82,7 +82,7 @@ String getInkTC(){
 String getInkUC(){
  return inkUC;
 }
-String makeTC( String ink ){
+static String makeTC( String ink ){
    //Expected length > 1 in UEB!
  if (ink.length() == 1) return ink.toUpperCase();
  StringBuilder buf = new StringBuilder();

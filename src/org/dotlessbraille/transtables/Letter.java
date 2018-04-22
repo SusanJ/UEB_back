@@ -1,12 +1,10 @@
 package org.dotlessbraille.transtables;
-
 import java.util.HashMap;
 import java.lang.Character;
+import org.dotlessbraille.manifold.Sign;
 
-public class Letter{
+public class Letter extends Sign {
 
- //Supports capitalization if requested.  Does not know why
- //request is made.  
 
 //North American ASCII Braille for letters
 //ASCII Braille can use either small or capital
@@ -65,12 +63,15 @@ public class Letter{
    new Letter( "^]n", "^]N", "&#x00F1;" ) //n with tilde above
 };
 
-public static HashMap<String,String> backLet =
-     new HashMap<String,String> ();
+ public static HashMap<String,String> backLet =
+      new HashMap<String,String> ();
+ public static HashMap<String,Sign> brlLet2Sign =
+      new HashMap<String,Sign> ();
+
 
  String lc;
  String uc;
- String lcInk;
+ String lcInkPrint;
  
 Letter( String lc, String uc){
  this.lc = lc;
@@ -80,29 +81,40 @@ Letter( String lcABrl, String ucABrl,
         String lcInk ){
   this.lc = lcABrl;
   this.uc = ucABrl;
-  this.lcInk = lcInk;
+  this.lcInkPrint = lcInk;
 }
 
 //Table for Latin letters 
 // lc and uc ASCII braille trans to lc print
 // ,lc or ,uc ascII braille trans to uc print.
+
+/**
+  brl a to ink a
+  brl A to ink a
+  brl ,a to ink A
+  brl ,A to ink A
+  brl ;a to ink a (letters a-j only)
+  brl ;A to ink a (letters a-j only)
+*/
+
 static void makeNAAbrlToPrint(boolean report, boolean display ){
 
   String brluc;
   String brllc;
   String ink;
-  
   for (int l=0; l<letters.length; l++){
    brluc = letters[l].uc;
    brllc = letters[l].lc;
-   ink = letters[l].lc;  //Assumed true for this ASCII braille
-   String capBrl = singleCaps +brllc;
+
+ //Assumed true for this ASCII braille transliteration
+   ink = letters[l].lc;  
+   String capBrl = singleCaps + brllc;
    String capInk = ink.toUpperCase();
-   backLet.put( brluc, ink );
-   backLet.put( brllc, ink );
-   backLet.put( capBrl, capInk );
+   backLet.put( brluc, ink );  //uc ascii brl small letter to lc ink
+   backLet.put( brllc, ink );  //lc ascii brl small letter to lc ink
+   backLet.put( capBrl, capInk ); //lc ascii brl cap letter to ucink
    capBrl = singleCaps+brluc;
-   backLet.put( capBrl, capInk );
+   backLet.put( capBrl, capInk ); //uc ascii brl cap letter  to ucink
   }
   //g1 indicator terminating numeric mode
   
@@ -110,7 +122,9 @@ static void makeNAAbrlToPrint(boolean report, boolean display ){
   for (int d=0; d<upperNumbers.length(); d++){
    brllc = g1Ind + upperNumbers.substring(d,d+1);
    ink = upperNumbers.substring(d,d+1);
-   backLet.put( brllc, ink );
+   brluc = g1Ind + upperNumbers.substring(d,d+1).toUpperCase();
+   backLet.put( brllc, ink ); //lc ascii brl g1 small letter to lc ink
+   backLet.put( brluc, ink ); //uc ascii brl g1 small letter to lc ink
   }
 
   makeModMap();
@@ -121,14 +135,13 @@ static void makeNAAbrlToPrint(boolean report, boolean display ){
 //NOT COMPLETE
 static void makeModMap(){
  for (int l=0; l<modLetters.length; l++){
-   backLet.put( modLetters[l].lc,  modLetters[l].lcInk);
-   backLet.put( modLetters[l].uc,  modLetters[l].lcInk);
+   backLet.put( modLetters[l].lc,  modLetters[l].lcInkPrint);
+   backLet.put( modLetters[l].uc,  modLetters[l].lcInkPrint);
  }
 }
 
 //
 public static boolean isLetter( String brl ){
- backTrans( brl );
  String ink = backTrans( brl );
  if (ink == null) return false;
  char test = ink.charAt( 0 );
