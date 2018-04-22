@@ -29,6 +29,28 @@ static boolean trace = false;
     //CONSTRUCTORS
  
 
+/**
+NumericIndicatorx( String lead, String trailers,
+                   String name, Scope scope, String groupName ){
+                  
+ super( lead, groupName, scope );
+ //numInds = new ArrayList<NumericIndicator>();
+ IndicatorType useType = IndicatorType.NUMERIC_START;
+ if (scope == Scope.TERMINATOR) {
+   useType = IndicatorType.NUMERIC_TERMINATOR;
+ }
+ makeNumInds( lead, trailers, useType ); 
+ //setIndicatorType( IndicatorType.NUMERIC_START );
+  //g1 + a,b,c,d,e,f,g,h,i,j acts as terminator
+  //other non-numeric mode automatic termination
+ if (debug) System.out.println( " NumInd con scope: "+scope );
+ if (scope == Scope.TERMINATOR) {
+   //System.out.println( "Ind type before: "+myType );
+   setIndicatorType( IndicatorType.NUMERIC_TERMINATOR );
+   //System.out.println( "Ind type after: "+myType );
+ }
+}
+*/
 
 //HACK -- NEEDS FIX
 NumericIndicator( String brl, String name, Scope scope){

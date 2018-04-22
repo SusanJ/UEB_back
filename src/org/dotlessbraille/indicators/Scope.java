@@ -2,6 +2,7 @@ package org.dotlessbraille.indicators;
 public enum Scope{
  //Indicator scopes
  UNKNOWN,
+ DONE,
  TF_SET,
  END_OF_LINE,
  NUM_SET,       //Numeric

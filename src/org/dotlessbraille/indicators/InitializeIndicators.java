@@ -10,8 +10,9 @@ public static void makeIndicators( boolean report,
   CapsIndicator.setUEBCapsInds( report, details );
   DotLocatorIndicator.makeTranslationTable( report, details );
   Grade1Indicator.makeG1Inds( report, details );
+  NemethIndicator.makeNemethIndicators( report, details );
   NumericIndicator.mayne( report, details );
-  SubSupIndicator.makeSubSupInds( true, details,
+  SubSupIndicator.makeSubSupInds( report, details,
                                   g1SymInd );
   TranscriberIndicator.makeTI_Table( report, details );
   TypeformIndicator.makeTfInds( report, details );
@@ -19,7 +20,7 @@ public static void makeIndicators( boolean report,
   if (report) Indicator.indicatorReport();
 }
 public static void main( String [] args ){
-  String g1SymInd = ";;;;";
+  String g1SymInd = ";";
   makeIndicators( true, false, g1SymInd );
 }
 }//End Class.

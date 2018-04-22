@@ -43,8 +43,8 @@ import org.dotlessbraille.manifold.KeepTrack2;
     by the standard G1 symbol indicator.  In that
     case both G1 indicators are active for that symbol.
 
-5.3.2 The effect of a grade 1 word indicator is
-terminated by a space or a grade 1 terminator.
+     5.3.2 The effect of a grade 1 word indicator is
+     terminated by a space or a grade 1 terminator.
 */
 
 public class Grade1Indicator extends Indicator{
@@ -71,6 +71,7 @@ Grade1Indicator( boolean mode, String key,
 }
 
 //====================
+//void setScope (Scope scope ){
 public static boolean setPending( Grade1Indicator g1Ind ){
  if (pending == null ){
   pending = g1Ind;
@@ -119,13 +120,19 @@ public static void clearSpecialG1(){
 }
 //Report whether any Grade1 mode is active
 public static boolean useGrade1(){
- if ( specialG1pending ) return true;
- if ( pending != null ) return true;
+ if ( specialG1pending ) {
+  System.out.println( "G1.useG1: special is active." );
+  return true;
+ }
+ if ( pending != null ) {
+  System.out.println( "Pending scope: "+pending.scope );
+  return true;
+ }
  return false;
 }
 
  //FIX == USE ENDSCOPE for all?
-public static void symbolDone( String brl ){
+public static void XsymbolDone( String brl ){
  if (specialG1pending ){
    if (specialG1.myScope.done( brl )){
     clearSpecialG1();
@@ -144,6 +151,13 @@ void setEndScope( EndScope myScope ){
 boolean scopeDone( String symbol ){
  return myScope.done( symbol );
 }
+public static void cancelG1SymbolMode(){
+ System.out.println( "G1Ind.--pending: "+pending );
+ if (pending == null) return;
+ if (pending.scope == Scope.NEXT_SIGN ){
+   pending = null;
+ }
+}
 
    //========================================
             //   Grade 1 Indicators.
@@ -155,16 +169,25 @@ static void makeSpecialG1Ind( IndicatorClass numInd ){
    new Grade1Indicator( true, KeepTrack2.g1SpecBrl, 
               IndicatorClass.GRADE1_INDICATOR );
   specG1Ind.setIndicatorType( IndicatorType.SPECIAL_GRADE_1 );
+  specG1Ind.setScope( Scope.SPECIAL );
   g1Inds.add( specG1Ind );
   specialG1 = specG1Ind;
   
      //EndSCOPE for special g1 mode
+
+ /** Rulebook Sec. 6.5.1 A numeric indicator also sets grade 
+    1 mode. Grade 1 mode, when set by a numeric indicator, 
+    is terminated by a space, hyphen, dash or grade 1 terminator.
+*/
     EndScope myEnd = new EndScope( "specialG1", true );
+    myEnd.addSym( " " );    // space
     myEnd.addSym( "-" );    // hyphen
     myEnd.addSym( ",-" );   // dash
     myEnd.addSym( "\",_" ); // long dash
+    myEnd.addSym( ";'");    // Grade 1 terminator
    
     specG1Ind.setEndScope( myEnd );
+    KeepTrack2.setEndscopeForSg1Mode( myEnd );
 }
 
 static void makeG1Inds( boolean report, boolean details ){
@@ -172,14 +195,22 @@ static void makeG1Inds( boolean report, boolean details ){
  Grade1Indicator g1SymInd = 
    new Grade1Indicator( ";", "Grade 1 Symbol", Scope.NEXT_SIGN );
    g1SymInd.setIndicatorType( IndicatorType.G1_SYMBOL );
+   
    g1Inds.add( g1SymInd );
+
 
  Grade1Indicator g1WrdInd = 
    new Grade1Indicator( ";;", "Grade 1 Word", Scope.WORD_OR_SEQUENCE );
    g1WrdInd.setIndicatorType( IndicatorType.G1_WORD );
    g1Inds.add( g1WrdInd );
-     //EndSCOPE for g1 Word Indicator
+
+      //EndSCOPE for g1 Word Indicator
     EndScope myEnd = new EndScope( "Grade 1 Word", true );
+    myEnd.addSym( " " );    // space
+    myEnd.addSym( ";'");    // Grade 1 terminator
+   
+     g1WrdInd.setEndScope( myEnd );
+    KeepTrack2.setEndscopeForSg1Mode( myEnd );
     g1WrdInd.setEndScope( myEnd );
 
  Grade1Indicator g1PassInd = 
@@ -192,7 +223,7 @@ static void makeG1Inds( boolean report, boolean details ){
   g1TermInd.setIndicatorType( IndicatorType.G1_TERMINATOR );
   g1Inds.add( g1TermInd );
 
- System.out.println( "   Grade1 Indicators made. ("
+ if (report) System.out.println( "   Grade1 Indicators made. ("
               +g1Inds.size()+")" );
 
 }
