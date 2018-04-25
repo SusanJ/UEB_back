@@ -44,17 +44,20 @@ ILC45: CARET('u'|'w'|ASTER|QMARK|COLON|EXCLAM);
 ILC456: USCORE('c'|'h'|'m'|'s'|'w'|EXCLAM);
 
 //Strong groupsigns: ch gh sh th wh  ed er ou ow  st ing ar
-//STRONG_GS:  (ASTER|LESSTHAN|PCENT|QMARK|COLON
-            //|DOLLAR|CBRAK|BSLASH|OBRAK
-           // |FRAC_LINE|PLUS_SIGN|GREATERTHAN
+//STRONG_GS:  (DOTS16|DOTS126|DOTS146|DOTS1456|DOTS156
+            //|DOTS1245|DOTS12456|DOTS1256|DOTS246s
+           // |DOTS34|DOTS346|DOTS345
             //); 
 
 //Strong wordsigns: child shall this which out still 
 //STRONG_WS: (ASTER|PCENT|QMARK|COLON|BSLASH|FRAC_LINE);       
 
-        //Non-alphabetic shortforms
-        //Explicitly used in standing-alone context
-        //The all-letter ones don't need to be explicit
+        //  Parser puts these non-alphabetic shortforms  
+        // explicitly in standing-alone context
+        // which simpifies backtranslation logic
+        //  The ~50 all-letter ones don't need to be explicit
+        // since alphabetic sequences that aren't 
+        // shortforms are easily backtranslated
  //Shortforms that start with the "be" contraction
 BESF: LOW_TWO('c'|'f'|'h'|'l'|'n'|'s'|'t'|'y');
  // children, much, such
@@ -64,10 +67,17 @@ SHSF: PCENT 'd';
  // against, first, must
 STSF: ('a''g'BSLASH)|('f'|'m')BSLASH;
  //ourselves
-OURSELVES: DOT5 BSLASH 'r''v''s';
+OURSELVES: BSLASH 'r''v''s';
  // although thyself
 THSF: 'a''l'QMARK|QMARK 'y''f';
-
+ // perhaps herself perceiving
+ERSF: (('p' CBRAK)('h'|'c''v''g'))|('h' CBRAK 'f');
+ // oneself
+ONESELF: DOT5 'o' 'f';
+ // themselves
+THMSLVS: EXCLAM 'm' 'v' 's';
+ // conceive, conceiving
+CONCV: '3''c''v'('g')?;
 
 //Alphabetic cells
 //CAP_LETTER: (',''f');
@@ -112,14 +122,19 @@ DOTS23:   LOW_TWO;
 DOTS25:   '3';
  fragment FULL_STOP: '4';
 DOTS256:  FULL_STOP;
+
 DOTS235:  '6'; 
 DOTS2356: '7';
 DOTS236:  '8';
+
  fragment LOW_ZERO: '0';
 DOTS356:  LOW_ZERO;
  fragment LOW_FIVE: '5';
+DOTS26:   LOW_FIVE;
  fragment LOW_NINE: '9';
-LOWER_ROOT: LOW_FIVE|LOW_NINE; //26+10=36; 36+8=44
+DOTS35:   LOW_NINE;
+
+//LOWER_ROOT: LOW_FIVE|LOW_NINE; //26+10=36; 36+8=44
 
 
 //Remaining 20 cells (including space)
@@ -143,18 +158,22 @@ DOT3:    '\'';
 DOTS146: PCENT;
  fragment COLON: ':';
 DOTS156: COLON;
- fragment OPAREN: '(';
- fragment CPAREN: ')';
- fragment OBRAK: '[';
- fragment CBRAK: ']';
+
  fragment AMPER: '&';
  fragment EQSIGN: '=';
+ fragment OPAREN: '(';
  fragment EXCLAM: '!';
- fragment ASTER:  '*';  
+ fragment CPAREN: ')';
+
+ fragment OBRAK: '[';
+ fragment CBRAK: ']';
+ fragment DOLLAR: '$';
+
+ fragment ASTER:  '*';
+ fragment QMARK:  '?'; 
  //fragment BSLASH: '\\\\';  //What I had found worked a while back?
  fragment BSLASH: '\\';  //April 2018 This works in new Antlr!
- fragment QMARK:  '?';
- fragment DOLLAR: '$';
+ 
 
 AND:  AMPER;  //dots12346
 FOR:  EQSIGN; //dots123456
@@ -166,10 +185,15 @@ DOTS16: ASTER;
 DOTS1456: QMARK;
 DOTS1256: BSLASH;
 
-ROOT:  (OBRAK|CBRAK
-       |DOLLAR|PCENT
-       )
-       ;  
+DOTS12456: CBRAK;
+DOTS246: OBRAK;
+DOTS1246: DOLLAR;
+
+
+//ROOT:  (OBRAK|CBRAK
+       //|DOLLAR
+       //)
+       //;  
 
 //64-8 = 56 cells counting space
 //ROOTS: (LETTER|     //26

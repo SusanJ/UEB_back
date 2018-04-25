@@ -1,3 +1,4 @@
+
 parser grammar simpleParser;
 options { tokenVocab = simpleLexer; }
 tokens {LATIN_LETTER, FUN_NAME}
@@ -17,11 +18,12 @@ line:  (nemethStartDisplay|nemethEndDisplay)(NEM_NEWLINE|NEWLINE)
        |(nemethStartInline|nemethEndInline)((nemSyms)+)(NEM_NEWLINE|NEWLINE)
 
       |( space)* ( (standingAlone) |
-                   (((numfrag)|(item)+)+)
+                   //( ( (numfrag)+|(item)+)+ )
+                   (symseq)
                  )                            
                  ( (separator)+ 
                    ( (standingAlone) |
-                     (((numfrag)|(item)+)+)
+                     (((numfrag)+|(item)+)+)
                    ) 
                  )*                            
         (trailingSep)*NEWLINE
@@ -40,6 +42,15 @@ nemethEndInline:   END_DIS;
 item: (capsPassageInd|capsWordInd|
        rootlessToken|pr_token|scrip);
 
+// Should be every possible symbols-sequence 
+//that isn't a Standing Alone expression?
+// If so we can use a Stack to find out
+//whether it is prefix word postfix or
+//whatever and deal with context-dependent
+//contractions!
+
+symseq: ( numfrag | item )+ ;
+
 space:  SPACE;
 hyphen: DOTS36;
 dash:   DOT6 DOTS36;
@@ -49,16 +60,15 @@ separator:  (space|hyphen|dash|long_dash);
 trailingSep: separator;
 
 roots: (  //LETTER|     //26 represents by "letters"
-          DOTS36|       //1
-        LOWER_ROOT|     //2
-        DOT2|DOTS23|DOTS25| //3
-        DOTS256|DOTS235|DOTS236|DOTS2356|  //4
+        DOTS356|DOTS36|         //2
+        DOTS26|DOTS35|  //2
+        DOT2|DOTS23|DOTS25|                  //3  (1. 2. 3)
+        DOTS256|DOTS235|DOTS236|DOTS2356|    //4
         DOTS34|DOTS126|DOTS345|DOTS346|DOT3| //5
-        ROOT|
+        DOTS12456|DOTS246|DOTS1246|          //3
         largeWords|DOTS16|DOTS1456|DOTS1256| //8
-        DOTS146|DOTS156);  //2  
-  
-
+        DOTS146|DOTS156);                    //2  
+ 
 letters: updigs|MOST_LETTERS|LETTERK;
   //Title-case only, embedded cap would violate "standing alone" criteria
 saLetters: (letters)(letters)*;
@@ -70,15 +80,24 @@ saLetters: (letters)(letters)*;
 
 ucLetters: DOT6(letters);
 prefix:   (DOT4|DOT5|DOT6|DOTS45|DOTS56|
-           DOTS46|DOTS456|DOTS3456);
-largeWords: AND|FOR|OF|THE|WITH;  
-initLetCons: ILC5|ILC45|ILC456;
- //The only shortform that uses a two-cell symbol
+           DOTS46|DOTS456
+     //    |DOTS3456  creates problem with numfrag not at start?
+           );
 
-//Strong wordsigns: child shall this which out still 
+
+largeWords: AND|FOR|OF|THE|WITH;  
+ //Strong wordsigns: child shall this which out still 
 strong_ws: (DOTS16|DOTS146|DOTS1456|DOTS156|DOTS1256|DOTS34);
-       
-shortForms: BESF|CHSF|SHSF|STSF;
+ //Shortforms that use other contractions       
+shortForms: BESF|CHSF|SHSF|STSF|OURSELVES|
+            THSF|ERSF|ONESELF|THMSLVS|CONCV;
+initLetCons: ILC5|ILC45|ILC456;
+finalLetCons: FLC46|FLC56;
+ //strong groupsigns: ch gh sh th wh  ed er ou ow  st ing ar 
+strong_gs:  (DOTS16|DOTS126|DOTS146|DOTS1456|DOTS156
+            |DOTS1246|DOTS12456|DOTS1256|DOTS246
+            |DOTS34|DOTS346|DOTS345
+            ); 
 
   //should the capsPass ind be in preAlone?
 standingAlone: 
@@ -86,7 +105,8 @@ standingAlone:
   ( (capsPassageInd|capsWordInd|DOT6)? (strong_ws|saLetters|shortForms) )
   (postAlone)*;
 
-pr_token: (largeWords|initLetCons|(prefix)?(roots|letters));
+pr_token: (largeWords|initLetCons|finalLetCons|strong_gs
+          |(prefix)?(roots|letters));
 updigs: (LETTERA|LETTERB|UPDIGS);
 numspacedig: (DOT5 updigs);
 //numind: {!line_cont}? ((DOTS3456) (UPDIGS| DOT2 | DOTS256 )) |
@@ -143,7 +163,7 @@ nemSyms: (nemInteger|nemReal|nemOp|nemComp
 //g1: capLetter;
 //letters: (POSS_DIGIT|LETTER|capLetter);
 
-subsup:(DOTS56)(LOWER_ROOT);
+subsup:(DOTS56)(DOTS26|DOTS35);
 
 encl1: (DOT5 DOTS126)(pr_token)+(DOT5 DOTS345);
 encl2: (DOTS46 DOTS126)(pr_token)+(DOTS46 DOTS345);
