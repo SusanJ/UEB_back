@@ -170,12 +170,18 @@ public static String backTrans( String brl ){
 //Return Return backtranslated letter as lower case
 //(Caller specifies case.)
 public static String backTrans2lc( String brl ){
- return backLet.get( brl ).toLowerCase();
+ String let = backLet.get( brl );
+ if (let != null) return let.toLowerCase();
+ //return backLet.get( brl ).toLowerCase();
+ return (String) null;
 }
 //Return Return backtranslated letter as upper case
 //(Caller specifies case.)
 public static String backTrans2UC( String brl ){
- return backLet.get( brl ).toUpperCase();
+ String let = backLet.get( brl );
+ if (let != null) return let.toUpperCase();
+ //return backLet.get( brl ).toUpperCase();
+ return (String) null;
 }
 public static void main( String [] args ){
  makeNAAbrlToPrint( true, false );

@@ -11,6 +11,7 @@ public static void makeTables( boolean report, boolean display ){
   LargeWord.makeLargeWordTable( report, display );
   Letter.makeNAAbrlToPrint( report, false );
   UpperNumber.makeUpperNumBtTable( report, false );
+  PartWord.makePartWordTables( report, display );
   Punctuation.makePrePuncBTTable( report, false );
   Punctuation.makePostPuncBTTable( report, false );
   Punctuation.makePrePostPairs( );

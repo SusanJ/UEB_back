@@ -36,17 +36,22 @@ static boolean makePrePuncBTTable( boolean report, boolean display ){
       prePunc.put( "-",   "-" );      // hyphen
  
       prePunc.put( "\"<", "(" );      // ( 
-      preEncl.put( "\"<", "(" );      // (    
+      preEncl.put( "\"<", "(" );      // (  
+  
       prePunc.put( ".<",  "[" );      // [
       preEncl.put( ".<",  "[" );      // [
+
       prePunc.put( "_<",  "{" );      // {
       preEncl.put( "_<",  "{" );      // {
+
       prePunc.put( "@<",  "[" );      // < 
 
       preEncl.put( "<", "" ); //Braille-only open grouping 
 
-   if (report)
-    System.out.println( "   Pre-punctuation table complete." ); 
+   if (report){
+    int cnt = prePunc.size();
+    System.out.println( "   Pre-punctuation table complete. ("+cnt+")" );
+   } 
     return true;
 }
 
@@ -81,8 +86,10 @@ static void makePostPuncBTTable( boolean report, boolean display){
 
       postEncl.put( ">", "" ); //Braille-only close grouping 
 
-     if (report) 
-      System.out.println( "   Post-punctuation table complete." );   
+    if (report){
+    int cnt = postPunc.size();
+    System.out.println( "  Post-punctuation table complete. ("+cnt+")" );
+   }  
 
 }
 public static void makePrePostPairs( ){
@@ -98,6 +105,12 @@ public static void makePrePostPairs( ){
  
 public static String getPrePunc( String brl ){
  return prePunc.get( brl );
+}
+public static boolean isPrePunc( String brl ){
+ return prePunc.containsKey( brl );
+}
+public static boolean isPostPunc( String brl ){
+ return postPunc.containsKey( brl );
 }
 public static String getPostPunc( String brl ){
  return postPunc.get( brl );

@@ -55,6 +55,8 @@ public class KeepTrack{
 
  BackInd backInd;
  Info4KT info4KT = new Info4KT();
+ ContractionHandler conHandler;
+ 
 
      //====Constructor====//
  
@@ -65,6 +67,7 @@ public class KeepTrack{
   this.letterBT = new LetterBT( capInfo );
   this.saLetterBT = new SALetterBT( capInfo, traceSA );
   //capsHandler = new CapsHandler( capInfo );
+  conHandler = new ContractionHandler( capInfo );
   setUncon( isUncontracted );
   Info4KT.setLinesDone( linesDone );
   backInd = new BackInd ( capInfo,
@@ -197,8 +200,26 @@ public String numfragDone( String brl ){
     non-indicators symbols in the category
    *************************************************
 */
-public String backTrans( String brl, Trans btMethod ){
+public String backTrans( String brl, Trans btMethod, 
+                        SymbolsSequence symSeq ){
 
+    initBackTrans( brl, btMethod );
+    if (btMethod == Trans.GENERIC_TOKEN){
+      String ink =  backInd.processIndicators( brl );
+      //System.out.println( "KeepTrack bt token: |"+ink+"|");
+      if (ink != null) {
+        symSeq.prTokenGotInd( ink );
+        return ink;
+      }
+      return addAfter( backTransToken( brl, symSeq ), brl );
+    } else {
+      System.out.println( "KT LOGIC ERROR, not GENERIC_TOKEN" );
+      System.exit( 0 );
+    }
+  return (String) null;
+}
+
+void initBackTrans( String brl, Trans btMethod ){
  KeepTrack2.checkNumMode( brl );
  KeepTrack2.checkSpecialG1Mode( brl );
  if (traceG1){ 
@@ -208,10 +229,15 @@ public String backTrans( String brl, Trans btMethod ){
    }
   }
 
-  //IF_AFTER should go somewhere else
+  //IF_AFTER should go somewhere else ?
  if (btMethod != Trans.IF_AFTER ){
   if (KeepTrack2.getLastWasSubSup()) updateSubSup( brl );
  }
+
+}
+public String backTrans( String brl, Trans btMethod ){
+
+ initBackTrans( brl, btMethod );
 
  switch (btMethod){
   case SA_PREFIX:
@@ -245,11 +271,11 @@ public String backTrans( String brl, Trans btMethod ){
    String ssEnd = info4KT.afterAtEOL();
    return info4KT.tfAfterAtEOL( ssEnd );
    //return TypeformsHandler.afterAtEOL( ssEnd );
-  case GENERIC_TOKEN:
-   String ink =  backInd.processIndicators( brl );
+  //case GENERIC_TOKEN:
+   //String ink =  backInd.processIndicators( brl );
      //System.out.println( "KeepTrack bt token: |"+ink+"|");
-   if (ink != null) return ink;
-   return addAfter( backTransToken( brl ), brl );
+   //if (ink != null) return ink;
+   //return addAfter( backTransToken( brl ), brl );
   case SEPARATOR:
    return backTransSeparator( brl );
  }
@@ -409,21 +435,31 @@ private String handleSAPostfix( String brl ){
  }
 
         // ***Generic token per parser grammar*** //
-        // Indicator cheeck handled by caller 
- private String backTransToken( String brl ) {
+        // Indicator check handled by caller 
+ private String backTransToken( String brl, SymbolsSequence symSeq ) {
  
  if (KeepTrack2.getDlMention()) return handleMention( brl );
+
+   //I think rootless token takes care of this now???
  //Most prefix root symbols are a single braille symbol
  //but might also be a one-cell symbol indicator
- //follwed by a one-cell symbol???
+ //followed by a one-cell symbol???
   if (brl.length() == 1){
    String pre = brl.substring(0,1);
    if (pre.equals( g1SymInd )){
+    
     //do something
    }
   }
 
   String ink;
+  boolean isAPrepunc = Punctuation.isPrePunc( brl );
+  if (isAPrepunc){
+   String pre = Punctuation.getPrePunc( brl );
+   System.out.println( "KT--PR got PrePunc: "+pre );
+   symSeq.prGotPrepunc( brl, pre );
+   return pre;
+  }
   boolean isALetter = Letter.isLetter( brl );
 
   if (isALetter){
@@ -437,8 +473,12 @@ private String handleSAPostfix( String brl ){
   }
 
   if (trace){
-    System.out.println( "KeepTrack, not letter trying as AnyPunc." );
+    System.out.println( 
+     "KeepTrack, not letter trying new con. handler." );
   }
+  ink= conHandler.backTransCon( brl, PartWordUse.ANYWHERE );
+  if (ink != null) return ink;
+
   capInfo.notALetter( brl );
   ink = anyPunc( brl );
   if (ink == null){

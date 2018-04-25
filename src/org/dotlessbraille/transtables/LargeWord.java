@@ -63,16 +63,25 @@ static void makeLargeWordTable( boolean report, boolean display){
   System.out.println( "     Large Word Table complete. ("+cnt+")" );
  }
 }
+public static boolean isLargeWord( String brl ){
+ return largeCon2Ink.containsKey( brl );
+}
 public static String backLC( String brl ){
  LargeWord lw = largeCon2Ink.get( brl );
- //System.out.println( "pw: "+pw );
+ System.out.println( "lw: "+lw );
+ if (lw == null) return (String) null;
+ System.out.println( "LW--trans: "+lw.getInk() );
  return lw.getInk();
 }
 public static String backTC( String brl ){
- return largeCon2Ink.get( brl ).getInkTC() ;
+ LargeWord lw = largeCon2Ink.get( brl );
+ if (lw == null) return (String) null;
+ return lw.getInkTC() ;
 }
 public static String backUC( String brl ){
- return largeCon2Ink.get( brl ).getInkUC();
+ LargeWord lw = largeCon2Ink.get( brl );
+ if (lw == null) return (String) null;
+ return lw.getInkUC();
 }
 public static Sign back2Sign( String brl ){
  LargeWord lw = largeCon2Ink.get( brl );

@@ -5,7 +5,7 @@ import org.dotlessbraille.utilities.BrailleCell;
             /**Short-form words array. */
 public class WordOrPartWord{
 
-public static String CON = "-";
+public static String CON = "3";
 public static String BE = "2";
 
                           //Short-form word cross-referenced by
@@ -21,7 +21,7 @@ public static String BE = "2";
  //in an exceptions list
 
  // Note, if the last item in the declaration is an integer (flag)
- //then the item is not used as a part word. (EBAE, in UEB
+ //then the item is not used as a part word. (EBAE guess; in UEB
  //there is an explicit list.)
 
  public static final WordOrPartWord BLIND =
@@ -32,6 +32,8 @@ public static String BE = "2";
 
  public static final WordOrPartWord SHOULD =
   new WordOrPartWord( "&#x0173;&#x0174;", "%d", "should" );
+
+ //--------------------
 
  public static final WordOrPartWord [] shortFormWords = {
   new WordOrPartWord( "&#x0206;&#x0207;&#x0208;&#x0209;&#x020A;", 
@@ -100,7 +102,6 @@ public static String BE = "2";
       "myself" ),
   new WordOrPartWord( "&#x01CD;&#x01CE;&#x01CF;", "\"of",
      "oneself" ),
-  //oneself,
   new WordOrPartWord( "&#x01D0;&#x01D1;&#x01D2;", "?yf",
       "thyself" ),
   new WordOrPartWord( "&#x01D3;&#x01D4;&#x01D5;",
@@ -116,6 +117,10 @@ public static String BE = "2";
   new WordOrPartWord( "&#x0145;&#x0146;", "af", "after" ), //Had word flag???
   new WordOrPartWord( "&#x0147;&#x0148;", "ag", "again", 1),
   new WordOrPartWord( "&#x0149;&#x014A;", "al", "also", 1),
+    // BE words can only be used as partwords at 
+    //the begining of a word, e.g. beforehand
+    // Those permitted by UEB are flagged with the "true" 
+    //parameter and use a special constructor
   new WordOrPartWord( "&#x014B;&#x014C;", BE+"c",
       "because", 1 ),
   new WordOrPartWord( "&#x014D;&#x014E;", BE+"f", "before",
@@ -170,10 +175,55 @@ public static String BE = "2";
       "yr", "your")
  };
 
+                  /**Initial-letter contractions list. */
+
+ public static final WordOrPartWord [] initLetterWords = {
+  new WordOrPartWord( "&#x00E3;&#x00E4;", "\"d", "day" ),
+  new WordOrPartWord( "&#x00E5;&#x00E6;", "\"e", "ever" ),
+  new WordOrPartWord( "&#x00E7;&#x00E8;", "\"f", "father" ),
+  new WordOrPartWord( "&#x00E9;&#x00EA;", "\"h", "here" ),
+  new WordOrPartWord( "&#x00EB;&#x00EC;", "\"k", "know" ),
+  new WordOrPartWord( "&#x00ED;&#x00EE;", "\"l", "lord" ),
+  new WordOrPartWord( "&#x00EF;&#x00F0;", "\"m", "mother" ),
+  new WordOrPartWord( "&#x00F1;&#x00F2;", "\"n", "name" ),
+  new WordOrPartWord( "&#x00F3;&#x00F4;", "\"o", "one", oneself),
+  new WordOrPartWord( "&#x00F5;&#x00F6;", "\"p", "part" ),
+  new WordOrPartWord( "&#x00F7;&#x00F8;", "\"q", "question" ),
+  new WordOrPartWord( "&#x00F9;&#x00FA;", "\"r", "right" ),
+  new WordOrPartWord( "&#x00FB;&#x00FC;", "\"s", "some" ),
+  new WordOrPartWord( "&#x00FD;&#x00FE;", "\"t", "time" ),
+  new WordOrPartWord( "&#x00FF;&#x0100;", "\"u", "under" ),
+  new WordOrPartWord( "&#x0101;&#x0102;", "\"w", "work" ),
+  new WordOrPartWord( "&#x0103;&#x0104;", "\"y", "young" ),
+  new WordOrPartWord( "&#x0105;&#x0106;", "\"*", "character" ),
+  new WordOrPartWord( "&#x0107;&#x0108;", "\"?", "through" ),
+  new WordOrPartWord( "&#x0109;&#x010A;", "\":", "where" ),
+  new WordOrPartWord( "&#x010B;&#x010C;", "\"\\", "ought" ),
+  new WordOrPartWord( "&#x010D;&#x010E;", "\"!", "there" ),
+  new WordOrPartWord( "&#x010F;&#x0110;", "^u", "upon" ),
+  new WordOrPartWord( "&#x0111;&#x0112;", "^w", "word" ),
+  new WordOrPartWord( "&#x0113;&#x0114;", "^?", "those" ),
+  new WordOrPartWord( "&#x0115;&#x0116;", "^:", "whose" ),
+  new WordOrPartWord( "&#x0117;&#x0118;", "^!", "these" ),
+  new WordOrPartWord( "&#x0119;&#x011A;", "_c", "cannot" ),
+  new WordOrPartWord( "&#x011B;&#x011C;", "_h", "had" ),
+  new WordOrPartWord( "&#x011D;&#x011E;", "_m", "many" ),
+  new WordOrPartWord( "&#x011F;&#x0120;", "_s", "spirit" ),
+  new WordOrPartWord( "&#x0121;&#x0122;", "_w", "world" ),
+  new WordOrPartWord( "&#x0123;&#x0124;", "_!", "their")
+ };
+
  public static HashMap<String, WordOrPartWord> sfCon2Ink = 
     new HashMap<String, WordOrPartWord>();
  public static HashMap<String, WordOrPartWord> Ink2sfCon = 
     new HashMap<String, WordOrPartWord>();
+
+ public static HashMap<String, WordOrPartWord> ilcCon2Ink = 
+    new HashMap<String, WordOrPartWord>();
+ public static HashMap<String, WordOrPartWord> Ink2ilcCon = 
+    new HashMap<String, WordOrPartWord>();
+
+
 
 
         /**Where item can be used as partword. */
@@ -190,8 +240,9 @@ PartWordUse used = PartWordUse.ANYWHERE;
 public WordOrPartWord( String dbCharRef, String aBrl, 
                        String ink ){
  this.dbCharRef = dbCharRef;
+ this.aBrl = aBrl;
  //this.aBrl = aBrl.toUpperCase();
- this.aBrl = BrailleCell.normalizeASCIIBraille( aBrl );
+ //this.aBrl = BrailleCell.normalizeASCIIBraille( aBrl );
  this.ink  = ink;
  inkUC = ink.toUpperCase();
  inkTC = Word.makeTC( ink );
@@ -229,48 +280,102 @@ String getInk(){ return ink; }
 String getInkTC(){ return inkTC; }
 String getInkUC(){ return inkUC; }
 
+   // BACKTRANSLATION TABLES
+
 static void makePartWordTable( boolean report, boolean display){
 
+ System.out.println( "makePartWordTable: "+shortFormWords.length );
  for (int sf=0; sf < shortFormWords.length; sf++ ){
   WordOrPartWord pw = shortFormWords[sf];
-  //System.out.println("pwtable: "+pw+" brl: "+pw.getBrl());
   sfCon2Ink.put( pw.getBrl(), pw );
-  if (pw.getBrl().equals( "AB")){
-   System.out.println( "Adding ab!");
-  }
   Ink2sfCon.put( pw.getInk(), pw);
  }
- report = true;
+ //report = true;
  if (report){
   int cnt = sfCon2Ink.size();
   System.out.println( "     Shortforms Table complete. ("+cnt+")" );
  }
+ makeILCTable( report, display );
+}
+static void makeILCTable( boolean report, boolean display){
+ System.out.println( "makePartWordTable: "+initLetterWords.length );
+
+ for (int ilc=0; ilc < initLetterWords.length; ilc++ ){
+  WordOrPartWord pw = initLetterWords[ilc];
+  //System.out.println("pwILCtable- brl: "+pw.getBrl());
+  ilcCon2Ink.put( pw.getBrl(), pw );
+  Ink2ilcCon.put( pw.getInk(), pw);
+ }
+ report = true;
+ if (report){
+  int cnt = ilcCon2Ink.size();
+  System.out.println( "     Init. Letter Cons. Table complete. ("+cnt+")" );
+ }
 }
 public static WordOrPartWord getSf4Brl( String brl ){
- return sfCon2Ink.get( brl );
+ return sfCon2Ink.get( brl.toLowerCase( ));
 }
-public static WordOrPartWord  getWord4Ink( String ink ){
+public static WordOrPartWord  getBrl4Sf( String ink ){
  return Ink2sfCon.get( ink.toLowerCase() );
 }
+public static boolean isILC( String brl ){
+ return ilcCon2Ink.containsKey( brl.toLowerCase() );
+}
+ 
   //Convert brl to LC to support UC ASCII Braille
 public static String backLC( String brl ){
  //System.out.println( "wopw backlC brl: "+brl );
- WordOrPartWord pw = sfCon2Ink.get( brl.toUpperCase() );
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
  //System.out.println( "pw: "+pw );
+ if (pw == null) pw = ilcCon2Ink.get( brl.toLowerCase() );
  if (pw == null ) return (String) null;
  return pw.getInk();
 }
 public static String backTC( String brl ){
- WordOrPartWord pw = sfCon2Ink.get( brl.toUpperCase() );
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
+ if (pw == null) pw = ilcCon2Ink.get( brl.toLowerCase() );
  if (pw == null ) return (String) null;
  return pw.getInkTC();
- //return sfCon2Ink.get( brl.toUpperCase() ).getInkTC() ;
 }
 public static String backUC( String brl ){ 
- WordOrPartWord pw = sfCon2Ink.get( brl.toUpperCase() );
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
+ if (pw == null) pw = ilcCon2Ink.get( brl.toLowerCase() );
  if (pw == null ) return (String) null;
  return pw.getInkUC();
- //return sfCon2Ink.get( brl.toUpperCase() ).getInkUC();
+}
+      //Initial letter contractions
+ //Convert brl to LC to support UC ASCII Braille
+public static String ilcBackLC( String brl ){
+ WordOrPartWord pw = ilcCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInk();
+}
+public static String ilcBackTC( String brl ){
+ WordOrPartWord pw = ilcCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInkTC();
+}
+public static String ilcBackUC( String brl ){ 
+ WordOrPartWord pw = ilcCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInkUC();
+}
+    //Just shortforms
+ //Convert brl to LC to support UC ASCII Braille
+public static String sfBackLC( String brl ){
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInk();
+}
+public static String sfBackTC( String brl ){
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInkTC();
+}
+public static String sfBackUC( String brl ){ 
+ WordOrPartWord pw = sfCon2Ink.get( brl.toLowerCase() );
+ if (pw == null ) return (String) null;
+ return pw.getInkUC();
 }
 }//End Class.
  
