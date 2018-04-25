@@ -48,6 +48,56 @@ public interface simpleParserListener extends ParseTreeListener {
 	 */
 	void exitCapsPassageInd(simpleParser.CapsPassageIndContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link simpleParser#rootlessToken}.
+	 * @param ctx the parse tree
+	 */
+	void enterRootlessToken(simpleParser.RootlessTokenContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#rootlessToken}.
+	 * @param ctx the parse tree
+	 */
+	void exitRootlessToken(simpleParser.RootlessTokenContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemethStartDisplay}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemethStartDisplay(simpleParser.NemethStartDisplayContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemethStartDisplay}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemethStartDisplay(simpleParser.NemethStartDisplayContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemethEndDisplay}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemethEndDisplay(simpleParser.NemethEndDisplayContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemethEndDisplay}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemethEndDisplay(simpleParser.NemethEndDisplayContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemethStartInline}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemethStartInline(simpleParser.NemethStartInlineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemethStartInline}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemethStartInline(simpleParser.NemethStartInlineContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemethEndInline}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemethEndInline(simpleParser.NemethEndInlineContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemethEndInline}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemethEndInline(simpleParser.NemethEndInlineContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link simpleParser#item}.
 	 * @param ctx the parse tree
 	 */
@@ -57,6 +107,16 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitItem(simpleParser.ItemContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#symseq}.
+	 * @param ctx the parse tree
+	 */
+	void enterSymseq(simpleParser.SymseqContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#symseq}.
+	 * @param ctx the parse tree
+	 */
+	void exitSymseq(simpleParser.SymseqContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#space}.
 	 * @param ctx the parse tree
@@ -158,16 +218,6 @@ public interface simpleParserListener extends ParseTreeListener {
 	 */
 	void exitUcLetters(simpleParser.UcLettersContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link simpleParser#rootlessToken}.
-	 * @param ctx the parse tree
-	 */
-	void enterRootlessToken(simpleParser.RootlessTokenContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link simpleParser#rootlessToken}.
-	 * @param ctx the parse tree
-	 */
-	void exitRootlessToken(simpleParser.RootlessTokenContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link simpleParser#prefix}.
 	 * @param ctx the parse tree
 	 */
@@ -178,15 +228,65 @@ public interface simpleParserListener extends ParseTreeListener {
 	 */
 	void exitPrefix(simpleParser.PrefixContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link simpleParser#pr_token}.
+	 * Enter a parse tree produced by {@link simpleParser#largeWords}.
 	 * @param ctx the parse tree
 	 */
-	void enterPr_token(simpleParser.Pr_tokenContext ctx);
+	void enterLargeWords(simpleParser.LargeWordsContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link simpleParser#pr_token}.
+	 * Exit a parse tree produced by {@link simpleParser#largeWords}.
 	 * @param ctx the parse tree
 	 */
-	void exitPr_token(simpleParser.Pr_tokenContext ctx);
+	void exitLargeWords(simpleParser.LargeWordsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#strong_ws}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrong_ws(simpleParser.Strong_wsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#strong_ws}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrong_ws(simpleParser.Strong_wsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#shortForms}.
+	 * @param ctx the parse tree
+	 */
+	void enterShortForms(simpleParser.ShortFormsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#shortForms}.
+	 * @param ctx the parse tree
+	 */
+	void exitShortForms(simpleParser.ShortFormsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#initLetCons}.
+	 * @param ctx the parse tree
+	 */
+	void enterInitLetCons(simpleParser.InitLetConsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#initLetCons}.
+	 * @param ctx the parse tree
+	 */
+	void exitInitLetCons(simpleParser.InitLetConsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#finalLetCons}.
+	 * @param ctx the parse tree
+	 */
+	void enterFinalLetCons(simpleParser.FinalLetConsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#finalLetCons}.
+	 * @param ctx the parse tree
+	 */
+	void exitFinalLetCons(simpleParser.FinalLetConsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#strong_gs}.
+	 * @param ctx the parse tree
+	 */
+	void enterStrong_gs(simpleParser.Strong_gsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#strong_gs}.
+	 * @param ctx the parse tree
+	 */
+	void exitStrong_gs(simpleParser.Strong_gsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#standingAlone}.
 	 * @param ctx the parse tree
@@ -197,6 +297,16 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStandingAlone(simpleParser.StandingAloneContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#pr_token}.
+	 * @param ctx the parse tree
+	 */
+	void enterPr_token(simpleParser.Pr_tokenContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#pr_token}.
+	 * @param ctx the parse tree
+	 */
+	void exitPr_token(simpleParser.Pr_tokenContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#updigs}.
 	 * @param ctx the parse tree
@@ -237,6 +347,86 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitNumfrag(simpleParser.NumfragContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemInteger}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemInteger(simpleParser.NemIntegerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemInteger}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemInteger(simpleParser.NemIntegerContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemReal}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemReal(simpleParser.NemRealContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemReal}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemReal(simpleParser.NemRealContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemOp}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemOp(simpleParser.NemOpContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemOp}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemOp(simpleParser.NemOpContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemComp}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemComp(simpleParser.NemCompContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemComp}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemComp(simpleParser.NemCompContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemId}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemId(simpleParser.NemIdContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemId}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemId(simpleParser.NemIdContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemOGroup}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemOGroup(simpleParser.NemOGroupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemOGroup}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemOGroup(simpleParser.NemOGroupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemCGroup}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemCGroup(simpleParser.NemCGroupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemCGroup}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemCGroup(simpleParser.NemCGroupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#nemSyms}.
+	 * @param ctx the parse tree
+	 */
+	void enterNemSyms(simpleParser.NemSymsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#nemSyms}.
+	 * @param ctx the parse tree
+	 */
+	void exitNemSyms(simpleParser.NemSymsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#d4_hash}.
 	 * @param ctx the parse tree
@@ -337,6 +527,76 @@ public interface simpleParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTfTermIndicator(simpleParser.TfTermIndicatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#tfSymbolInd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTfSymbolInd(simpleParser.TfSymbolIndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#tfSymbolInd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTfSymbolInd(simpleParser.TfSymbolIndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#tfWordInd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTfWordInd(simpleParser.TfWordIndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#tfWordInd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTfWordInd(simpleParser.TfWordIndContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#subsup}.
+	 * @param ctx the parse tree
+	 */
+	void enterSubsup(simpleParser.SubsupContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#subsup}.
+	 * @param ctx the parse tree
+	 */
+	void exitSubsup(simpleParser.SubsupContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl1}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl1(simpleParser.Encl1Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl1}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl1(simpleParser.Encl1Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl2}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl2(simpleParser.Encl2Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl2}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl2(simpleParser.Encl2Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#encl3}.
+	 * @param ctx the parse tree
+	 */
+	void enterEncl3(simpleParser.Encl3Context ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#encl3}.
+	 * @param ctx the parse tree
+	 */
+	void exitEncl3(simpleParser.Encl3Context ctx);
+	/**
+	 * Enter a parse tree produced by {@link simpleParser#scrip}.
+	 * @param ctx the parse tree
+	 */
+	void enterScrip(simpleParser.ScripContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link simpleParser#scrip}.
+	 * @param ctx the parse tree
+	 */
+	void exitScrip(simpleParser.ScripContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link simpleParser#preAlone}.
 	 * @param ctx the parse tree
